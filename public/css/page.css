@@ -1,0 +1,107 @@
+body {
+padding-top: 50px;
+font-size: 12px;
+}
+
+.navbar-inverse {
+    background-color: #000;
+    border-color: #080808; 
+    color:silver;
+}
+
+
+
+.starter-template {
+padding: 40px 15px;
+text-align: center;
+}
+
+.footer {
+	text-align: center; 
+	background-color: #E7E7E7; 
+	padding: 10px;
+	border-color: #E7E7E7;
+  font-size: 14px;
+}
+
+.mainbox,.frmincidente {
+	margin-top: 20px;
+}
+
+.msj_valida {
+	color: green;
+}
+
+.msj_error {
+  color: red;
+}
+
+.negrita {
+	font-weight: bold;
+}
+
+
+/** Autocomplete */
+.ui-autocomplete-loading {
+    background: white url("../images/icon_loading.gif") right center no-repeat;
+}
+.ui-autocomplete {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  float: left;
+  display: none;
+  min-width: 160px;
+  _width: 160px;
+  padding: 4px 0;
+  margin: 2px 0 0 0;
+  list-style: none;
+  background-color: #ffffff;
+  border-color: #ccc;
+  border-color: rgba(0, 0, 0, 0.2);
+  border-style: solid;
+  border-width: 1px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+  -moz-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+  -webkit-background-clip: padding-box;
+  -moz-background-clip: padding;
+  background-clip: padding-box;
+  *border-right-width: 2px;
+  *border-bottom-width: 2px;
+}
+/* ********** */
+
+
+#dialog-message {
+    font-size: 11px;
+    margin-bottom: -14px;
+}
+.ui-dialog-buttonset{
+  font-size: 12px;
+}
+
+.form-control {
+  font-size: 12px;
+  height: 30px;
+}
+
+.form-group {
+  margin-bottom: 13px;
+}
+
+.panel-title{
+  font-size: 13px;
+}
+
+/** MODAL ALERT Y CONFIRM */
+.modal-content{
+  margin-top: 30%;
+}
+.desactiva_link{
+  pointer-events: none;
+}

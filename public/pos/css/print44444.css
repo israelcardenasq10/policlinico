@@ -1,0 +1,79 @@
+* { margin:0; padding:0; }
+/*#wrapper {
+  width: 480px !important;
+  margin: 0 auto !important;
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-weight:normal !important;
+  font-size:12px !important;
+  text-transform: uppercase !important;
+  }*/
+.page-break  {
+  display: none;
+  page-break-before: always;
+  }
+#pos #leftdiv {
+  margin:0;
+  padding:0;
+  min-width:400px;
+  }
+
+
+#cp, .navbar, #sidebar, #lefttop #showCustomerModal, #lefttop #scancode { display: none !important; }
+
+#cp, #title_table, #showCustomerModal, #botbuttons, #satu, #theTime, #totalTable { display: none !important; }
+
+#cp, #saletbl { display: none !important; }
+
+#cp, #saletbl2 { position: absolute; top: 30px; }
+
+#totalizacion { display:none !important; }
+
+#footer { display:none !important; }
+
+#flotante, #mas, #menos { display:none !important; }
+
+.estatus, .total_p {
+  display: none !important;
+}
+.price {
+  display: none !important;
+}
+#pos, .code {
+  background: none;
+  border: 0px solid #C7C7C7;
+  width: 240px;
+}
+#pos, .keyboard {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+
+#protbldiv, table, table td {
+  padding: 0px !important;
+  border: 0 !important;
+  width: 100%;
+  font-size:16px !important;
+  }
+#prodiv, #protbldiv, #leftdiv {
+  height: auto !important;
+  overflow:visible !important;
+  border: 0 !important;
+  }
+table td, table th {
+  border-bottom: 1px solid #999;
+  color: #000000 !important;
+  font-size:16px !important;
+  font-weight: bold;
+  }
+/*#print, #printhead, #printfooter {
+  display: none;
+  border-bottom: 1px solid #999;
+  text-align:center;
+  }*/
+#customer {
+  position: absolute;
+  top: -12px;
+  text-align: left;
+  border:0 !important;
+  }

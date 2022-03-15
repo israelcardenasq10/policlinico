@@ -1,0 +1,75 @@
+/* Layout */
+.wrapper {
+  height: 100%;
+  position: relative;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+.wrapper:before,
+.wrapper:after {
+  content: " ";
+  display: table;
+}
+.wrapper:after {
+  clear: both;
+}
+.content-wrapper, .right-side {
+    min-height: 10%;
+    background-color: #fff;
+    z-index: 800;
+}
+.layout-boxed .wrapper {
+  max-width: 1250px;
+  margin: 0 auto;
+  min-height: 100%;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+  position: relative;
+}
+.layout-boxed {
+    background-color: red;
+    /*background: url('../img/boxed-bg.jpg') repeat fixed;*/
+}
+/* Content */
+.content {
+  min-height: 250px;
+  padding: 15px;
+  margin-right: auto;
+  margin-left: auto;
+  padding-left: 15px;
+  padding-right: 15px;
+}
+/* Page Header */
+.page-header {
+  margin: 10px 0 20px 0;
+  font-size: 22px;
+}
+.page-header > small {
+  color: #666;
+  display: block;
+  margin-top: 5px;
+}
+/*
+ * Component: Main Header
+ * ----------------------
+ */
+.main-header {
+  position: relative;
+  max-height: 100px;
+  z-index: 1030;
+}
+/*
+ * Component: Box
+ * --------------
+ */
+.chart-legend {
+  margin: 10px 0;
+}
+.chart {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+}
+.chart svg,
+.chart canvas {
+  width: 100% !important;
+}

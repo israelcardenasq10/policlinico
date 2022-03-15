@@ -1,0 +1,7 @@
+.DS_Store
+
+application/config/database.php
+
+system/
+public/images
+borrar.js
