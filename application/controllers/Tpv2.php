@@ -1329,7 +1329,7 @@ class Tpv extends Secure_area {
       	$lis_mesas = $this->tpv_model->listarMesas();
 
       	echo '<div class="tab-content" style="overflow-y: scroll; height: 589px;">';
-		echo '<h3 style="margin-top:10px;">Seleccione una Sala!</h3>';
+		echo '<h3 style="margin-top:10px;">Seleccione una Mesa!</h3>';
 		foreach($lis_mesas as $lis)
 		{
 	        @$lis_pv_cab = $this->tpv_model->verDatoPVCab($fecha, $lis->id_mesa);

@@ -83,7 +83,7 @@ class Autocompletado_model extends CI_Model {
 		// return $resultados->result();
 		$sql = "SELECT id_producto AS id,CONCAT(codigo_ant,' - S/',precio_venta, ' - ',nombre) AS TEXT,id_categoria
 		FROM tb_productos
-		WHERE activo='SI' AND CONCAT(codigo_ant,' - ',nombre) LIKE '%".$abuscar."%' ";
+		WHERE activo='SI' AND CONCAT(codigo_ant,' - S/',precio_venta, ' - ',nombre) LIKE '%".$abuscar."%' ";
 		
 		$resultados = $this->db->query($sql);
 		if($resultados->num_rows() > 0)

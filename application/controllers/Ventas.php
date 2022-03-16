@@ -88,7 +88,7 @@ class Ventas extends Secure_area {
 						'pago_cliente' => 0,
 						'vuelto' => 0,
 						'estado' => 'V',
-						'date_updated' => mdate("%Y-%m-%d", time()).' '.mdate("%H:%i:%s", time()),
+						'date_updated' => mdate("%Y-%m-%d", time()).'T'.mdate("%H:%i:%s", time()),
 						'persona_id_updated' => $this->session->userdata('person_id')
 					);
 			$this->ventas_model->anularTicketVenta($data, $id_transac);
@@ -398,12 +398,12 @@ class Ventas extends Secure_area {
 		$sfactu = trim($transac_ref[0]->sfactu);
 		// $nfactu='';
 		/**
-		 * 8	F001	NCF 	Nota de Credito Factura
-		 * 9	B003	NCB 	Nota de Credito Boleta
+		 * 8	B003	NCB 	Nota de Credito Boleta
+		 * 9	F001	NCF 	Nota de Credito Factura
 		 */
-		$id_serie = $sfactu=='F001'?8:9;
+		$id_serie = substr($sfactu,0,1)=='B'?8:9;
 		// $cod_max = $this->ventas_model->maxTpoSerNum($tdoc,$sfactu)
-		$cod_max = $this->tpv_model->generarCodMax($id_serie);
+		$cod_max = $this->tpv_model->generarCodMax($sfactu);
 		$num = $cod_max  + 1;
 		$nfactu=str_pad($num, 8 ,"0", STR_PAD_LEFT);
 		$num_doc = $tdoc.'-'.$sfactu.'-'.$nfactu;
@@ -429,7 +429,7 @@ class Ventas extends Secure_area {
 			'estado' => 'D',
 			'fecha_registro' => mdate("%Y-%m-%d", time()),
 			'id_owner' => $this->session->userdata('person_id'),
-			'date_created' => mdate("%Y-%m-%d", time()).' '.mdate("%H:%i:%s", time()),
+			'date_created' => mdate("%Y-%m-%d", time()).'T'.mdate("%H:%i:%s", time()),
 			'persona_id_created' => $this->session->userdata('person_id'),
 			'tdoc'  => $tdoc,
 			'sfactu'=> $sfactu,
@@ -619,7 +619,7 @@ class Ventas extends Secure_area {
             
             
 			/* Date is kept the same for testing */
-			$date = mdate("%d/%m/%y", time()).' '.date('H:i:s');
+			$date = mdate("%d/%m/%y", time()).'T'.date('H:i:s');
 
 			/* Start the printer */
 			$logo = EscposImage::load(APPPATH . "libraries/escpos/example/resources/logo_fs.png", false);

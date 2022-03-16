@@ -643,7 +643,7 @@ class Tpv extends Secure_area {
 			$col_num_doc = 'num_crt_ven';
 		*/
 		$lis_global = $this->globales_model->ver($this->g_id_global);
-		$cod_max = $this->tpv_model->generarCodMax($id_serie); //tipo_doc
+		$cod_max = $this->tpv_model->generarCodMax($lis_serie_doc[0]->serie); //tipo_doc
 
 		if($lis_global[0]->num_ven !== $cod_max) // TOMA EL CODIGO GLOBALES
 		{

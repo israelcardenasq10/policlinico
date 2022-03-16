@@ -24,7 +24,7 @@ class Tpv_model extends CI_Model {
 		$this->db->select("a.id AS id_emple, b.first_name,b.last_name,b.imagen,b.email");
 		$this->db->from('tb_empleados a');
 		$this->db->join('tb_datos b', 'a.person_id = b.person_id');
-		if($id_perfil==5){//Mozo
+		if($id_perfil==5){ // Mozo
 			$this->db->where('a.id_perfil',$id_perfil);
 		}else{
 			$this->db->where('a.person_id',$person_id);
@@ -60,7 +60,7 @@ class Tpv_model extends CI_Model {
         $query = $this->db->get();
 		return $query->result();
 	}
-	
+
 	/*
 	public function actualizarEvento($data, $fecha)
 	{
@@ -292,13 +292,15 @@ class Tpv_model extends CI_Model {
 	}
 
 	// GRABAR TRANSACCIÓN DE VENTA	
-	public function generarCodMax($id_serie) //tipo_doc
-	{
-		$this->db->select(" ISNULL(MAX(nfactu),0) AS num_doc ");
-		$this->db->where('id_serie', $id_serie);
+	public function generarCodMax($sfactu) //tipo_doc
+	{		
+		$this->db->select("ISNULL(MAX(nfactu),'00000000') AS num_doc ");
+		$this->db->where('sfactu', $sfactu);
 		$query = $this->db->get('tb_transac_pventa');
 		$lis = $query->result();
+		// var_dump($lis[0]->num_doc);
 		return $lis[0]->num_doc;
+
 	}
 
 	public function insertarTransacVenta($data)
@@ -356,12 +358,12 @@ class Tpv_model extends CI_Model {
 		return $query->result();
 	}
 
-	public function verEmpleadoVenta($id_emple)
+	public function verEmpleadoVenta($person_id)
 	{
 		$this->db->select("d.first_name");
 		$this->db->from('tb_datos d');
-		$this->db->join('tb_empleados e', 'd.person_id = e.person_id');
-		$this->db->where('e.id', $id_emple);
+		// $this->db->join('tb_empleados e', 'd.person_id = e.person_id');
+		$this->db->where('d.person_id', $person_id);
         $query = $this->db->get();
 		return $query->result();
 	}

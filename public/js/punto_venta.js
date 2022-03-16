@@ -738,7 +738,12 @@ $(document).ready(function() {
                     "data": result.data,
                     "columns": [{
                             "render": function(data, type, row) {
-                                return `<button class="btn btn-default btn-sm" type="button" ><span class="glyphicon glyphicon-print"></span></button>`;
+                                let btn_anular = `<button class="btn btn-default btn-sm" type="button" onclick="anularVta(${row.id_transac})"><span class="glyphicon glyphicon-remove-circle fa-2x"></span></button>`
+                                    // let btn_imp= `<button class="btn btn-default btn-sm" type="button" ><span class="glyphicon glyphicon-print"></span></button>`
+                                if (row.anulado == "SI" || row.sfactu.substr(0, 1) == 'F') {
+                                    btn_anular = '' //`<button class="btn btn-default btn-sm" type="button" ><span class="glyphicon glyphicon-remove-circle fa-2x"></span></button>`
+                                }
+                                return btn_anular;
                             }
                         },
                         { "data": "num_doc" },
@@ -749,10 +754,11 @@ $(document).ready(function() {
                         {
                             "render": function(data, type, row) {
                                 let valor = `<button class="btn btn-default btn-sm" type="button" onclick="changeMP(${row.id_transac} , ${row.id_tp});"> ${row.tipo_pago} </button>`
-                                return (camb_mp == '' || row.id_cierre !== null) ? row.tipo_pago : valor;
+                                return (camb_mp == '' || row.id_cierre !== null || row.anulado == "SI") ? row.tipo_pago : valor;
                             }
                         }, {
                             "render": function(data, type, row) {
+
                                 return `${row.id_cierre?'C':'A'}`;
                             }
                         },
@@ -761,6 +767,11 @@ $(document).ready(function() {
                         { "data": "total_venta" }
 
                     ],
+                    "rowCallback": function(row, data, index) {
+                        if (data.anulado == "SI") {
+                            $(row).find('td').css('background-color', '#ec6565')
+                        }
+                    }
 
                 });
                 if (result.data.length > 0) {
@@ -1690,3 +1701,31 @@ $("#btn_limp_mesas").click(() => {
         }
     })
 })
+
+const anularVta = (id_transac) => {
+    swal({
+        title: "Punto de Venta",
+        text: "Desea Anular esta Venta?",
+        type: "warning",
+        closeOnConfirm: true,
+        showCancelButton: true,
+    }, function() {
+        $.ajax({
+            url: url_web + module_id + '/anularVta',
+            type: "POST",
+            data: { id_transac: id_transac },
+            success: function(data) {
+                // console.log('data', data)
+                swal({
+                    title: "Punto de Venta",
+                    text: "Se Anuló la Venta",
+                    type: "success",
+                    closeOnConfirm: true
+                }, function() {
+                    window.location.href = url_web + module_id;
+                });
+            }
+        })
+    });
+
+}

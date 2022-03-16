@@ -114,10 +114,12 @@ class Tpv extends Secure_area {
 					</div>';
 			else: 
 				echo '
-				<div class="col-xs-4">
+				<div class="col-xs-4">					
 					<div class="panel text-center" style="padding: 10px; height: 80px; cursor: pointer; box-shadow: 1px 1px 1px 1px gray; color: blue;  '.$disabled_prod.'" onclick="agregarProducto('.$lis->id_categoria.', '.$lis->id_producto.');">
-						<div class="pull-left" style="color: black; font-weight: bold; font-size: 30px; position: relative;  padding: 0px 10px 0px 10px; margin: 0;">'.$lis->nro_producto.'</div>
-						<div style="'.$style_prod.' '.$texto_prod_disab.'">'.$lis->nombre.'</div>
+						<div class="row">	
+							<div class="col-md-3 pull-left" style="color: black; font-weight: bold; font-size: 30px; position: relative;  padding: 0px 10px 0px 10px; margin: 0;">'.$lis->nro_producto.'</div>
+							<div class="col-md-9" style="'.$style_prod.' '.$texto_prod_disab.'">S/'.$lis->precio_venta.'|'.$lis->nombre.'</div>
+						</div>
 					</div>
 				</div>';
 			endif;
@@ -247,7 +249,8 @@ class Tpv extends Secure_area {
 								'print_comanda' => 0 ,
 								'dividir_cuenta'=> '' ,
 								'nota_comanda'=> '' ,
-								'transac_venta' => 0 
+								'transac_venta' => 0 ,
+								'unidad' => $value->unidades,
 							);
 			$this->tpv_model->insertarTMPPuntoVenta($data_insert);
 		}
@@ -527,10 +530,9 @@ class Tpv extends Secure_area {
 	{
 		$cabecera_tck = " \n";
 		$cabecera_tck .= "        ".$this->g_nombre_corto."\n";
-		$cabecera_tck .= "     ".$this->g_razon_social."\n";
+		$cabecera_tck .= "        ".$this->g_razon_social."\n";
 		$cabecera_tck .= "          RUC ".$this->g_ruc."\n";
 		$cabecera_tck .= "     ".$this->g_direccion."\n";
-		$cabecera_tck .= "       ".$this->g_distrito." - ".$this->g_ciudad." - ".$this->g_ciudad."\n\n";
 		return $cabecera_tck;
 	}
 
@@ -607,8 +609,7 @@ class Tpv extends Secure_area {
 			$cuerpo_tck .= "          TOTAL   ".$moneda_ticket.$total_venta."\n";
 			$cuerpo_tck .= "--------------------------------------------\n";
 			$cuerpo_tck .= "             Atendido por: ".strtoupper($usuario_venta[0])."\n";
-			$cuerpo_tck .= "           ".$this->g_firma_ticket."\n";
-			$cuerpo_tck .= "                                        \n";
+			$cuerpo_tck .= "   ".$this->g_firma_ticket."\n";
 			
 			$nv_cuerpo_tck = str_replace("<pre>","", $cuerpo_tck);
 			// echo ($nv_cuerpo_tck);
@@ -618,17 +619,10 @@ class Tpv extends Secure_area {
 				$this->printerTCKNegrita($nv_cuerpo_tck, $this->g_ruta_printer_simple);
 
 	}
-	
-	public function printerTCK($nv_cuerpo_tck, $ruta_printer)
-	{
-		$enlace = printer_open($ruta_printer);
-		printer_write($enlace, $nv_cuerpo_tck);
-		printer_close($enlace);
-	}
-	
+		
 	public function printerTCKNegrita($nv_cuerpo_tck, $ruta_printer)
 	{
-		echo $nv_cuerpo_tck;
+		// echo $nv_cuerpo_tck;
 		try{
 			$connector = new WindowsPrintConnector($ruta_printer);
 			$printer = new Printer($connector);
@@ -701,12 +695,13 @@ class Tpv extends Secure_area {
 		/***********************************************************
 		 * CREACION DE TIPO, SERIE Y NUMERO
 		 ***********************************************************/
-		$cod_max = $this->tpv_model->generarCodMax($id_serie);       
-		$num = $cod_max  + 1;
 		$lis_serie_doc = $this->series_documentos_model->ver($id_serie);
 		$tipo_doc = trim($lis_serie_doc[0]->tipo_doc);
 		$tdoc = trim($lis_serie_doc[0]->tdoc);
-		$sfactu = trim($lis_serie_doc[0]->serie);						
+		$sfactu = trim($lis_serie_doc[0]->serie);	
+
+		$cod_max = $this->tpv_model->generarCodMax($sfactu );       
+		$num = ($cod_max*1)  + 1;							
 		$nfactu=str_pad($num, 8 ,"0", STR_PAD_LEFT);
 		$num_doc = $tdoc.'-'.$sfactu.'-'.$nfactu;
 		/***********************************************************
@@ -814,7 +809,8 @@ class Tpv extends Secure_area {
 			echo json_encode ( array('error'=>"No Coincide el El total con Total cobrado"));
 			return;
 		}
-
+		$date_created =mdate("%Y-%m-%d", time()).'T'.mdate("%H:%i:%s", time());
+		
 		$data = array(
 						'num_doc' => $tdoc.'-'.$sfactu.'-'.$nfactu,
 						'subtotal_venta' => $subtotal_venta,
@@ -834,7 +830,7 @@ class Tpv extends Secure_area {
 						'estado' => 'D',
 						'fecha_registro' => $fecha_registro,
 						'id_owner' => $this->session->userdata('person_id'),
-						'date_created' => mdate("%Y-%m-%d", time()).'T'.mdate("%H:%i:%s", time()),
+						'date_created' => $date_created,
 						'persona_id_created' => $this->session->userdata('person_id'),
 						'tdoc'  => $tdoc,
 						'sfactu'=> $sfactu,
@@ -1076,7 +1072,7 @@ class Tpv extends Secure_area {
 			$cuerpo_tck = $this->getCabeceraImpresionTck();
 
 			$cuerpo_tck .= "                ".strtoupper($dato_mesa[0]->mesa)."\n";
-			$cuerpo_tck .= "Tk: Recibo         ".$this->g_espacio_print.mdate("%d/%m/%y", time()).' '.$hora_fin."\n";
+			$cuerpo_tck .= "Tk: Recibo         ".mdate("%d/%m/%y", time()).' '.$hora_fin."\n";
 			
 			$cuerpo_tck .= "====================================\n";
 			
@@ -1088,7 +1084,7 @@ class Tpv extends Secure_area {
 				$cuerpo_tck .= "====================================\n";
 			}
 
-			$cuerpo_tck .= "   Descripcion    ".$this->g_espacio_print."CantP.Unit P.Total\n";
+			$cuerpo_tck .= "   Descripcion    CantP.Unit P.Total\n";
 			$cuerpo_tck .= "====================================\n";
 			
 			foreach ($lis_tv_deta as $lis)
@@ -1127,7 +1123,7 @@ class Tpv extends Secure_area {
 			
 			$text_tipo_pago =  str_pad($lis_t_pago[0]->tipo_pago, 25 ," ", STR_PAD_LEFT); 
 			
-			$cuerpo_tck .= "\t      TOTAL   ".$moneda_ticket.$total_venta."\n";
+			$cuerpo_tck .= "       TOTAL   ".$moneda_ticket.$total_venta."\n";
 
 			if($id_serie <> 7)
 			{
@@ -1141,18 +1137,15 @@ class Tpv extends Secure_area {
 			}
 
 			if($lis_t_pago[0]->id_tp == 1 && $id_serie <> 7) // 7 = Cortesia
-				$cuerpo_tck .= "\t         Cambio   ".$moneda_ticket.$vuelto."\n";
+				$cuerpo_tck .= "          Cambio   ".$moneda_ticket.$vuelto."\n";
 
 			$cuerpo_tck .= "====================================\n";
-			$cuerpo_tck .= "  	   Cajero(a): ".strtoupper($usuario_venta[0])."\n";
+			$cuerpo_tck .= "   Cajero(a): ".strtoupper($usuario_venta[0])."\n";
 
 			if($id_serie == 7)
 				$cuerpo_tck .= "             CORTESIA               \n";
 
-			$cuerpo_tck .= "	 ".$this->g_firma_ticket."\n";
-			
-			$cuerpo_tck .= "                                        \n";
-			
+			$cuerpo_tck .= "     ".$this->g_firma_ticket."\n\n";
 			$nv_cuerpo_tck = str_replace("<pre>","", $cuerpo_tck);
             
             //Print
@@ -1209,6 +1202,34 @@ class Tpv extends Secure_area {
 		}
 	}
 
+	public function cabecera(){
+		$connector = new WindowsPrintConnector($this->g_ruta_printer_simple);
+		$printer = new Printer($connector);
+		$printer -> setJustification(Printer::JUSTIFY_CENTER);
+		// $logo = EscposImage::load(APPPATH . "libraries/escpos/example/resources/logo_fs_3.jpeg", false);
+		// $printer -> bitImage($logo);			
+		$printer -> setFont(Printer::FONT_B);
+		$printer -> setTextSize(2, 1);
+		$printer -> text("Policlínico\n");
+		$printer -> setFont(Printer::FONT_B);
+		$printer -> setTextSize(4, 3);
+		$printer -> text("Carapongo\n");
+		$printer -> feed();
+		$printer -> setFont(Printer::FONT_B);
+		$printer -> setTextSize(2, 1);
+		$printer -> text("Medical Center\n");
+		
+		$printer -> feed(2);
+		$printer -> selectPrintMode();		
+		$printer -> text("-------------------------------------------\n");
+		$printer -> text("Descripción              Cant.|P.Unit|Total\n");
+		$printer -> text("-------------------------------------------\n");
+		
+		$printer -> cut();
+		$printer -> pulse();
+
+		$printer -> close();
+	}
     public function generarFacBolElectronica($id_serie, $sfactu, $nfactu, $moneda_ticket, $lis_tv, $lis_tv_deta, $lis_t_pago, $dato_mesa, $usuario_venta, $hora_fin, $valor_QR , $fecha_registro)
     {
         try
@@ -1234,27 +1255,30 @@ class Tpv extends Secure_area {
 			/* Start the printer */
 			$connector = new WindowsPrintConnector($this->g_ruta_printer_simple);
 			$printer = new Printer($connector);
-			$logo = EscposImage::load(APPPATH . "libraries/escpos/example/resources/logo_fs_3.jpeg", false);
-
-			/* Print top logo */
 			$printer -> setJustification(Printer::JUSTIFY_CENTER);
-			$printer -> bitImage($logo);
+			// $logo = EscposImage::load(APPPATH . "libraries/escpos/example/resources/logo_fs_3.jpeg", false);
+			// $printer -> bitImage($logo);			
+			$printer -> setFont(Printer::FONT_B);
+			$printer -> setTextSize(2, 1);
+			$printer -> text("Policlínico\n");
+			$printer -> setFont(Printer::FONT_B);
+			$printer -> setTextSize(4, 3);
+			$printer -> text("Carapongo\n");
 			$printer -> feed();
-			/* Name of shop */
+			$printer -> setFont(Printer::FONT_B);
+			$printer -> setTextSize(2, 1);
+			$printer -> text("Medical Center\n");			
+			$printer -> feed(2);
 			//$printer -> selectPrintMode(Printer::MODE_DOUBLE_WIDTH);
-			$printer -> text($this->g_razon_social."\n");
 			$printer -> selectPrintMode();
+			$printer -> text($this->g_razon_social."\n");
 			$printer -> text($this->g_ruc."\n");
 			$printer -> selectPrintMode();
-			$printer -> text($this->g_direccion." / ".$this->g_distrito." - ".$this->g_ciudad."\n");
+			$printer -> text($this->g_direccion."\n");
 			$printer -> feed();
 
-			/* Title of receipt */
-            // if($id_serie == 1) $val_d = 'F';
-            // else $val_d = 'B';
-            
 			$printer -> setEmphasis(true);
-			$printer -> text(($id_serie == 1)? 'FACTURA DE VENTA ELECTRONICA': 'BOLETA DE VENTA ELECTRONICA');
+			$printer -> text((substr($sfactu,0,1) == 'F')? 'FACTURA DE VENTA ELECTRONICA': 'BOLETA DE VENTA ELECTRONICA');
 			//$printer -> text(($id_serie == 1)? 'FACTURA DE VENTA DE PRUEBA': 'BOLETA DE VENTA DE PRUEBA');
             $printer -> text("\n");
 			$printer -> selectPrintMode(Printer::MODE_DOUBLE_WIDTH);
@@ -1262,21 +1286,25 @@ class Tpv extends Secure_area {
 			$printer -> selectPrintMode();
 			$printer -> setEmphasis(false);
 
-			$printer -> text("CAJA 01 / ".strtoupper($dato_mesa[0]->mesa)." / "." Responsable: ".strtoupper($usuario_venta[0])."\n");
+			$printer -> text("CAJA / ".strtoupper($dato_mesa[0]->mesa)." / "." Responsable: ".strtoupper($usuario_venta[0])."\n");
 			$printer -> setJustification(Printer::JUSTIFY_LEFT );			
 			$printer -> text("Fecha de Emisión :".date("d/m/Y")."\n");
 			$printer -> text("Fecha de Vencimiento : ".date("d/m/Y")."\n");
 			$printer -> text("Condición : CONTADO\n");
 
-			$printer -> setJustification(Printer::JUSTIFY_CENTER);
-
-			//$printer -> text("_______________________________________________\n");
-            $col = EscposImage::load(APPPATH . "libraries/escpos/example/resources/campos.png", false);
-			$printer -> setEmphasis(false);
+			$printer -> feed(1);
+			$printer -> selectPrintMode();		
+			$printer -> text("-------------------------------------------\n");
+			$printer -> text("Descripción              Cant.|P.Unit|Total\n");
+			$printer -> text("-------------------------------------------\n");
+			
+			// $printer -> text("_______________________________________________\n");
+            // $col = EscposImage::load(APPPATH . "libraries/escpos/example/resources/campos.png", false);
+			// $printer -> setEmphasis(false);
 
 			/* Print top Columns */
-			$printer -> setJustification(Printer::JUSTIFY_CENTER);
-			$printer -> bitImage($col);                
+			// $printer -> setJustification(Printer::JUSTIFY_CENTER);
+			// $printer -> bitImage($col);                
             
 			/* Items */
 			$printer -> setJustification(Printer::JUSTIFY_LEFT);
@@ -1305,11 +1333,10 @@ class Tpv extends Secure_area {
 			//$printer -> text("IMP. BOLSA PLASTICA                         0.10");
 			            
 			$printer -> setEmphasis(true);
-			$printer -> text($subtotal);
+			$printer -> text("\n".$subtotal);
 			$printer -> setEmphasis(false);
 			$printer -> feed();
 
-			/* Tax and total */
 			$printer -> text($tax);
             //$printer -> setEmphasis(false);
 			$printer -> selectPrintMode(Printer::MODE_DOUBLE_WIDTH);
@@ -1331,9 +1358,9 @@ class Tpv extends Secure_area {
             
             $ob_nal = new NumeroALetras();
             $printer -> setJustification(Printer::JUSTIFY_CENTER);
-            $printer -> text("\n-----------------------------------------------\n");
+            $printer -> text("-------------------------------------------\n");
             $printer -> text('SON: '.$ob_nal->convertir(floor($lis_tv[0]->total_venta)).' CON '.substr($lis_tv[0]->total_venta, -2).'/100 SOLES'."\n");
-            $printer -> text("-----------------------------------------------\n");
+            $printer -> text("-------------------------------------------\n");
             $printer -> selectPrintMode();
             
             
@@ -1349,22 +1376,22 @@ class Tpv extends Secure_area {
 			$printer -> selectPrintMode();
             			
 			// QR
-			$this->titleQR($printer, "\n");
+			// $this->titleQR($printer, "\n");
 			$testStr = $valor_QR;
 
 			// Change size
-			$this->titleQR($printer, "");
+			// $this->titleQR($printer, "");
 			$sizes = array(
 			    7 => "");
 			foreach ($sizes as $size => $label) {
 				$printer -> setJustification(Printer::JUSTIFY_CENTER);
-			    $printer -> qrCode($testStr, Printer::QR_ECLEVEL_L, $size);
+			    $printer -> qrCode($testStr, Printer::QR_ECLEVEL_L, 7);//$size);
 			    //$printer -> text("Pixel size $size $label\n");
-			    $printer -> feed();
+			    $printer -> feed(2);
 			}
 
 			/* Footer */
-			$printer -> feed(2);
+			// $printer -> feed(2);
 			$printer -> setJustification(Printer::JUSTIFY_CENTER);			
 			$printer -> text($this->g_firma_ticket."\n");
             // $printer -> text("Representacion impresa del documento de venta \n Electronica, puede consultar el documento\n ingresando a: \n ".$this->g_web."/facturador\n");			
@@ -1476,7 +1503,7 @@ class Tpv extends Secure_area {
 		$fecha = mdate("%Y-%m-%d", time());
 		$new_mesa = $this->tpv_model->listarMesas($id_mesa);
 		$data = array(
-					'id_owner' => $this->session->userdata('id_emple'),
+					'id_owner' => $this->session->userdata('person_id'),
 					'accion_log' => 'cambio_mesa',
 					'nro_mesa' => $this->input->post('nro_mesa')." =>".$new_mesa[0]->mesa,
 					'fecha_log' => $fecha.'T'. mdate("%H:%i:%s", time()),
@@ -1535,7 +1562,7 @@ class Tpv extends Secure_area {
 
 	public function identificarMesa()
 	{
-		$id_emple = $this->session->userdata('id_emple');
+		$id_emple = $this->session->userdata('person_id');
 		$hora_ini = mdate("%H:%i:%s", time());
 		$fecha = mdate("%Y-%m-%d", time());
 		$id_mesa = $this->input->post('id_mesa');
@@ -1850,7 +1877,7 @@ class Tpv extends Secure_area {
 		$cod_array = explode('-', $this->input->post('id'));
 		$id_cab = $cod_array[0];
 		$correlativo = $cod_array[1];
-		$id_emple = $this->session->userdata('id_emple');
+		$id_emple = $this->session->userdata('person_id');
 
 
 		$lis_tmp_deta = $this->tpv_model->obtenerProdTMPTpv($id_cab, $correlativo);
@@ -1904,7 +1931,7 @@ class Tpv extends Secure_area {
 		$id_cab = $cod_array[0];
 		$correlativo = $cod_array[1];
 		$lis_tmp_deta = $this->tpv_model->obtenerProdTMPTpv($id_cab, $correlativo);
-		$id_emple = $this->session->userdata('id_emple');
+		$id_emple = $this->session->userdata('person_id');
 		///INSERT LOG SEND EMAIL
 		$obs = $this->input->post('obs');
 		$fechahora = mdate("%Y-%m-%d", time()).'T'.mdate("%H:%i:%s", time());
@@ -1993,7 +2020,7 @@ class Tpv extends Secure_area {
 		$hora = mdate("%H:%i:%s", time());
 		$fecha = mdate("%Y-%m-%d", time());
 		$data = array(
-					'id_owner' => $this->session->userdata('id_emple'),
+					'id_owner' => $this->session->userdata('person_id'),
 					'accion_log' => 'pv_suprimir_venta',
 					'nro_mesa' => $this->input->post('nro_mesa'),
 					'fecha_log' => $fecha.'T'.$hora,
@@ -2103,7 +2130,7 @@ class Tpv extends Secure_area {
 	{
 		$this->tpv_model->limpMesas();
 
-		$id_emple = $this->session->userdata('id_emple');
+		$id_emple = $this->session->userdata('person_id');
 		$fecha_cierre = mdate("%Y-%m-%d", time());
 		$hora_cierre = mdate("%H:%i:%s", time());
 
@@ -2118,10 +2145,13 @@ class Tpv extends Secure_area {
 		$total_efectivo = $total_tarjetas = 0;
 		foreach ($lis_ventas as $lis)
 		{
-			if($lis->id_tp == 1) // Efectivo
-				$total_efectivo = $total_efectivo + $lis->total_venta;
-			else 				 // Tarjetas
-				$total_tarjetas = $total_tarjetas + $lis->total_venta;
+			if($lis->anulado == "NO"){
+				if($lis->id_tp == 1) // Efectivo
+					$total_efectivo = $total_efectivo + $lis->total_venta;
+				else 				 // Tarjetas
+					$total_tarjetas = $total_tarjetas + $lis->total_venta;
+			}
+			
 		}
 		$total_caja = ($total_efectivo + $total_tarjetas);
 
@@ -2140,13 +2170,13 @@ class Tpv extends Secure_area {
 				);
 		$id_cierre_caja = $this->ventas_model->insertarCierreCaja($data);
 
-		$num_caja =  'CAJA-'.str_pad($id_cierre_caja, 8 ,"0", STR_PAD_LEFT);
+		$num_caja =  'CAJA-'.str_pad($id_cierre_caja, 6 ,"0", STR_PAD_LEFT);
 			
 		$lis_user_venta = $this->tpv_model->verEmpleadoVenta($id_emple);
 		$moneda_ticket = substr($this->g_moneda, 0, 2); // CORREGIR AQUI EN CASO SEA OTRA MONEDA QUE NO SEA "S/"
 		
 		$cuerpo_tck = $this->getCabeceraImpresionTck();
-		$cuerpo_tck .= "Tk: ".$num_caja."  ".$this->g_espacio_print.mdate("%d/%m/%y", time()).' '.$hora_cierre."\n";
+		$cuerpo_tck .= "Tk: ".$num_caja."   ".mdate("%d/%m/%y", time()).' '.$hora_cierre."\n";
 
 		$cuerpo_tck .= "====================================\n";
 		$cuerpo_tck .= "    Reporte de Cambio de Turno      \n";
@@ -2210,15 +2240,13 @@ class Tpv extends Secure_area {
 
 			foreach ($lis_ventas as $lis)
 			{
-				// Actualiza las ventas con el CODIGO de CIERRE CAJA!
-					$this->tpv_model->actualizarTransacVenta(array('id_cierre' => $id_cierre_caja), $lis->id_transac);
-				// --
+				$this->tpv_model->actualizarTransacVenta(array('id_cierre' => $id_cierre_caja), $lis->id_transac);
 			}
 		}
 		else
 		{
 			$cuerpo_tck = "Sin Ventas                      0.00\n";
-			$cuerpo_tck .= "====================================\n";
+			$cuerpo_tck .= "==================================\n";
 		}
 		// TOTAL EFECTIVO
 		$total_efectivo = str_pad(number_format($total_efectivo, 2), 8 ," ", STR_PAD_LEFT);
@@ -2231,16 +2259,16 @@ class Tpv extends Secure_area {
 		$cuerpo_tck .= "Efectivo Soles y Dolares ".$moneda_ticket.$total_efectivo."\n"; //$lis_tv[0]->subtotal_venta
 		$cuerpo_tck .= "Tarjetas                 ".$moneda_ticket.$total_tarjetas."\n";
 		$cuerpo_tck .= "TOTAL CAJA               ".$moneda_ticket.$total_caja."\n";
-		$cuerpo_tck .= "========================================\n";
-		$cuerpo_tck .= "	 ".$this->g_firma_ticket."\n";
+		$cuerpo_tck .= "=====================================\n";
+		$cuerpo_tck .= "     ".$this->g_firma_ticket."\n";
 
 		$cuerpo_tck .= "                                        \n";
 		$cuerpo_tck .= "                                        \n";
 		$cuerpo_tck .= "                                        \n";
 		$cuerpo_tck .= "                                        \n";
 		}else{
-			$cuerpo_tck = "Sin Ventas                      0.00\n";
-			$cuerpo_tck .= "====================================\n";
+		$cuerpo_tck = "Sin Ventas                      0.00\n";
+		$cuerpo_tck .= "====================================\n";
 		}
 		$nv_cuerpo_tck = str_replace("<pre>","", $cuerpo_tck);
 		$this->printerTCKNegrita($nv_cuerpo_tck, $this->g_ruta_printer_simple);	
@@ -2248,16 +2276,16 @@ class Tpv extends Secure_area {
 
 	public function imprimirCierreCaja()
 	{
-		$id_emple = $this->session->userdata('id_emple');
+
+		$id_emple = $this->session->userdata('person_id');
 		$fecha_cierre = mdate("%Y-%m-%d", time());
 		$hora_cierre = mdate("%H:%i:%s", time());
 				
 		$lis_ventas = $this->ventas_model->verListaVentaCierreCaja($fecha_cierre);
 		if($lis_ventas){
 
-		$total_ticket = $this->ventas_model->verTotalTicketCajaXDia($fecha_cierre);
-
-		// Proceso "Imprimir el TICKET"
+			$total_ticket = $this->ventas_model->verTotalTicketCajaXDia($fecha_cierre);
+			
 			$lis_user_venta = $this->tpv_model->verEmpleadoVenta($id_emple);
 			$moneda_ticket = substr($this->g_moneda, 0, 2); 
 
@@ -2388,10 +2416,10 @@ class Tpv extends Secure_area {
 
     public function obtenerDetalleVentaTK($name = '', $cant = '', $price = '', $total = '')
 	{
-	    if(strlen($name) >= 28)
-            $name = substr($name, 0, 29);
+	    if(strlen($name) >= 26)
+            $name = substr($name, 0, 26);
         		
-        $leftName		= str_pad($name, 31) ;        
+        $leftName		= str_pad($name, 27) ;        
         $rightCant   	= str_pad($cant, 3, ' ', STR_PAD_LEFT);
 		$rightPrecio 	= str_pad($price, 7, ' ', STR_PAD_LEFT);
 		$rightTotal 	= str_pad($total, 7, ' ', STR_PAD_LEFT);
@@ -2401,7 +2429,7 @@ class Tpv extends Secure_area {
     public function obtenerTotalesVentaTK($name = '', $price = '', $moneda = false)
 	{
         $rightCols = 10;
-        $leftCols = 38;
+        $leftCols = 34;
         if ($moneda) {
             $leftCols = $leftCols / 2 - $rightCols / 2;
         }
@@ -2513,5 +2541,24 @@ class Tpv extends Secure_area {
 
 	public function limpMesas(){
 		$this->tpv_model->limpMesas();
+	}
+
+	public function anularVta()
+	{
+		$id_transac = $this->input->post('id_transac');
+		$fechahora = mdate("%Y-%m-%d", time()).'T'.mdate("%H:%i:%s", time());
+		$persona_upd = $this->session->userdata('person_id') ;
+				
+		$data = array(
+			'anulado' => 'SI',  
+			'persona_id_updated' => $persona_upd ,
+			'date_updated' => $fechahora
+		);
+		
+		$where = array(
+			'id_transac' => $id_transac 
+		);
+		
+		$this->tpv_model->updatetransac($where, $data);
 	}
 }

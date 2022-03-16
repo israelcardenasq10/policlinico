@@ -102,6 +102,7 @@ class Ventas_model extends CI_Model {
 		$this->db->join('tb_empleados e', 'tmpcab.id_emple = e.id');
 		$this->db->join('tb_datos d', 'e.person_id = d.person_id');
 		$this->db->join('tb_pv_mesas m', 'tmpcab.id_mesa = m.id_mesa');
+		$this->db->where_not_in("pv.tdoc ", array('07','08') );
 		$this->db->where('pv.fecha_registro',$fecha );
 		$this->db->or_where('pv.id_cierre is null');
 		$this->db->order_by("pv.id_transac", "desc");
@@ -113,8 +114,11 @@ class Ventas_model extends CI_Model {
 	{
 		$this->db->select_sum("total_venta");
 		$this->db->from('tb_transac_pventa pv');
-		$this->db->where('pv.fecha_registro',$fecha );
-		$this->db->or_where('pv.id_cierre is null');
+		// $this->db->where_not_in("pv.tdoc ", array('07','08') );
+		// $this->db->where('pv.fecha_registro',$fecha );
+		// $this->db->or_where('pv.id_cierre is null');
+		$where ="pv.tdoc NOT IN('07','08') AND pv.anulado='NO' AND (pv.fecha_registro='".$fecha."' OR pv.id_cierre is null )" ;
+		$this->db->where($where);
         $query = $this->db->get();
 		return $query->result();
 	}
@@ -135,7 +139,7 @@ class Ventas_model extends CI_Model {
 	// -- PROCESO CERRAR CAJA
 	public function verTurnoCaja($fecha)
 	{
-		$this->db->select("ISNULL(MAX(turno),0) as turno");
+		$this->db->select("ISNULL(MAX(turno),'00000') as turno");
 		$this->db->where("fecha_cierre", $fecha);
 		$query = $this->db->get('tb_cerrar_caja');
 		$lis = $query->result();
@@ -146,6 +150,7 @@ class Ventas_model extends CI_Model {
 		$this->db->select("COUNT(*) AS total_venta_turno");
 		$this->db->from('tb_transac_pventa');
 		$this->db->where('id_cierre IS NULL');
+		$this->db->where('anulado','NO');
 		$query = $this->db->get();
 		$lis = $query->result();
 		return $lis[0]->total_venta_turno;
@@ -166,6 +171,7 @@ class Ventas_model extends CI_Model {
 		$this->db->select("*");
 		$this->db->from('tb_transac_pventa');
 		$this->db->where("fecha_registro", $fecha);
+		$this->db->where("anulado", "NO");
 		// $this->db->where('id_cierre IS NULL');
 		$this->db->order_by("id_tp", "ASC");
 		$query = $this->db->get();
@@ -175,8 +181,8 @@ class Ventas_model extends CI_Model {
 	{
 		$this->db->select("*");
 		$this->db->from('tb_transac_pventa');
-		$where =" id_cierre IS NULL";
-		$this->db->where($where);
+		$this->db->where('id_cierre IS NULL');
+		// $this->db->where('anulado','NO');
 		// $this->db->where("fecha_registro", $fecha);
 		// $this->db->where('id_cierre IS NULL');
 		//$this->db->order_by("id_tp", "ASC");
@@ -187,8 +193,8 @@ class Ventas_model extends CI_Model {
 	{
 		$this->db->select("id_tp");
 		$this->db->from('tb_transac_pventa');
-		$where =" id_cierre IS NULL";
-		$this->db->where($where);
+		$this->db->where(" id_cierre IS NULL");
+		$this->db->where("anulado","NO");
 		// $this->db->where("fecha_registro", $fecha);
 		// $this->db->where('id_cierre IS NULL');
 		$this->db->group_by('id_tp'); 
@@ -200,6 +206,8 @@ class Ventas_model extends CI_Model {
 	{
 		$this->db->select("id_tp");
 		$this->db->from('tb_transac_pventa');
+		$this->db->where("anulado", "NO");
+
 		$where =" fecha_registro='$fecha' OR id_cierre IS NULL";
 		$this->db->where($where);
 		// $this->db->where("fecha_registro", $fecha);
@@ -215,6 +223,7 @@ class Ventas_model extends CI_Model {
 		$this->db->select("*");
 		$this->db->from('tb_transac_pventa');
 		$this->db->where("id_tp", $id_tp);
+		$this->db->where("anulado", "NO");
 		$where =" (fecha_registro='$fecha' OR id_cierre IS NULL)";
 		$this->db->where($where);
 		$query = $this->db->get();
@@ -226,8 +235,11 @@ class Ventas_model extends CI_Model {
 		$this->db->select("*");
 		$this->db->from('tb_transac_pventa');
 		$this->db->where("id_tp", $id_tp);
+		$this->db->where("anulado", "NO");
+
 		// $where ="(fecha_registro='$fecha' OR id_cierre IS NULL)";
 		// $this->db->where($where);
+		$this->db->where('anulado','NO');
 		$this->db->where('id_cierre IS NULL');
 		$query = $this->db->get();
 		return $query->result();
@@ -257,6 +269,8 @@ class Ventas_model extends CI_Model {
 		// $where =" fecha_registro='$fecha' OR id_cierre IS NULL";
 		// $this->db->where($where);
 		$this->db->where("fecha_registro", $fecha);
+		$this->db->where("anulado", "NO");
+		$this->db->where_not_in("tdoc ", array('07','08') );
 		// $this->db->where('id_cierre IS NULL');
 		$this->db->group_by('id_tp'); 
 		$this->db->order_by("id_tp", "ASC");
