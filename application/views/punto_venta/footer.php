@@ -17,6 +17,7 @@
 <!-- Placed at the end of the document so the pages load faster -->
 <script src="<?=base_url()?>public/jquery/jquery-1.12.4.min.js"></script>
 <script src="<?=base_url()?>public/bootstrap/js/bootstrap.min.js"></script>
+<script src="<?=base_url()?>public/jquery/js/moment.min.js"></script>
 <!-- Scroll -->
 <script type="text/javascript" src="<?=base_url()?>public/pos/js/jquery.carouFredSel-6.2.1.js"></script>
 

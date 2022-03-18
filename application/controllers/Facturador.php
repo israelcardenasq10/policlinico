@@ -115,4 +115,62 @@ class Facturador extends Secure_area {
 		}
 	}
 
+	public function validarResumen(){
+		$resumenes = $this->ventas_model->resumencabecera();
+
+		foreach($resumenes  as $val){
+			if($val->ntickect==''){
+
+				try 
+				{	
+					$id = $val->id_resumen;
+					$resumen = $val->NOM_ARCH;
+					/*** connect to SQLite database ***/
+					$baseDeDatos = new PDO("sqlite:C:\SUNAT\bd\BDFacturador.db");
+					$baseDeDatos->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+					$update="SELECT DES_OBSE FROM DOCUMENTO WHERE NOM_ARCH='$resumen';";
+					$resultado = $baseDeDatos->query($update);
+					$dato = $resultado->fetchAll(PDO::FETCH_OBJ);
+					$verif = substr($dato[0]->DES_OBSE,0,11 );
+					if($verif=='Nro. Ticket'){
+						$data = array('ntickect' => $dato[0]->DES_OBSE);			
+						$this->ventas_model->actresumen($id,$data);
+					}
+				}
+				catch(PDOException $e)
+				{
+					echo $e->getMessage();
+					echo "<br><br>Database -- NOT -- loaded successfully .. ";
+					die( "<br><br>Query Closed !!! $error");
+				}
+			}			
+			
+		}
+
+		$baseDeDatos = new PDO("sqlite:C:\SUNAT\bd\BDFacturador.db");
+		$baseDeDatos->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+		$resultado = $baseDeDatos->query("SELECT * FROM DOCUMENTO");
+		$lista_sqlite = $resultado->fetchAll(PDO::FETCH_OBJ);
+		
+		foreach($lista_sqlite as $rs){
+			if($rs->IND_SITU!='03' && substr($rs->NUM_DOCU,0,2)=='RC'){
+				foreach($resumenes  as $val){
+				if($val->NOM_ARCH == $rs->NOM_ARCH){
+					$baseDeDatos = new PDO("sqlite:C:\SUNAT\bd\BDFacturador.db");
+					$baseDeDatos->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+					$update="UPDATE DOCUMENTO SET DES_OBSE='$val->ntickect' , IND_SITU='08' WHERE NOM_ARCH='$rs->NOM_ARCH';";
+					$resultado = $baseDeDatos->exec($update);
+				}
+				}
+			}else if($rs->IND_SITU!='03' && substr($rs->NUM_DOCU,0,1)=='F'){
+					$baseDeDatos = new PDO("sqlite:C:\SUNAT\bd\BDFacturador.db");
+					$baseDeDatos->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+					$update="UPDATE DOCUMENTO SET IND_SITU='02' WHERE NOM_ARCH='$rs->NOM_ARCH';";
+					$resultado = $baseDeDatos->exec($update);
+			}
+		}
+
+	}
+
+
 }

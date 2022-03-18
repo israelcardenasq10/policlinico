@@ -509,4 +509,19 @@ class Ventas_model extends CI_Model {
 		$query = $this->db->query("EXEC sp_cab_transac_cabecera 1,$id_transac ");
 		return $query->result();
 	}
+
+	public function detalleVentaDia($fecha)
+	{
+		$this->db->select("a.*,b.*,c.tipo_pago");
+		$this->db->from('tb_transac_pventa a');
+		$this->db->join('tb_transac_pventa_detalle b','a.id_transac=b.id_transac');
+		$this->db->join('tb_tipo_pago c','c.id_tp = a.id_tp');
+		$this->db->where("a.fecha_registro", $fecha);
+		$this->db->where("anulado", "NO");
+		$this->db->where_not_in("tdoc ", array('07','08') );
+		$this->db->order_by("a.num_doc", "ASC");
+		$query = $this->db->get();
+		return $query->result();
+	}
+
 }

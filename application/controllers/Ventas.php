@@ -823,4 +823,80 @@ class Ventas extends Secure_area {
 	    $printer -> text($str);
 	    $printer -> selectPrintMode();
 	}
+
+	public function exportventas(){
+		$fecha = $this->uri->segment(3);
+//		echo $fecha;
+		$this->load->library('excel');
+
+        $objPHPExcel = new PHPExcel();
+        $objPHPExcel->getProperties()->setCreator("Maarten Balliauw")
+                ->setLastModifiedBy("Maarten Balliauw")
+                ->setTitle("Office 2007 XLSX Test Document")
+                ->setSubject("Office 2007 XLSX Test Document")
+                ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
+                ->setKeywords("office 2007 openxml php")
+                ->setCategory("Test result file");
+
+        $objPHPExcel->setActiveSheetIndex(0);
+        $objPHPExcel->getActiveSheet()->setTitle('COMPROBANTES');
+
+		$ventas = $this->ventas_model->detalleVentaDia($fecha);
+		// var_dump($ventas);
+
+		$objPHPExcel->getActiveSheet()->setCellValue('A1', "FECHA"); 
+        $objPHPExcel->getActiveSheet()->setCellValue('B1', "COMPROBANTE");
+        $objPHPExcel->getActiveSheet()->setCellValue('C1', "PACIENTE");
+        $objPHPExcel->getActiveSheet()->setCellValue('D1', "ESPECIALIDAD");
+        $objPHPExcel->getActiveSheet()->setCellValue('E1', "ATENCIÓN");
+        $objPHPExcel->getActiveSheet()->setCellValue('F1', "MEDIOPAGO");
+        $objPHPExcel->getActiveSheet()->setCellValue('G1', "MONTO");
+
+		$objPHPExcel->getActiveSheet()->getColumnDimension('a')->setWidth(12);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('b')->setWidth(20);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('c')->setWidth(50);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('d')->setWidth(20);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setWidth(50);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setWidth(10);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setWidth(20);
+        
+		$i = 2;
+        foreach ($ventas as $value){
+			//var_dump($value).'<br><br>';
+			echo $value->tipo_pago;
+
+			$objPHPExcel->getActiveSheet()
+			->setCellValue('A' . $i, $fecha )
+			->setCellValue('B' . $i, $value->num_doc)
+			->setCellValue('C' . $i, $value->n_rs)
+			->setCellValue('D' . $i, $value->categoria)
+			->setCellValue('E' . $i, $value->producto)
+			->setCellValue('F' . $i, $value->tipo_pago)
+			->setCellValue('G' . $i, $value->total);
+			$i++;
+		}
+
+		$objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
+        ob_end_clean();
+        
+        //header('Content-Type: application/txt'); //mime type
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        
+        //$extension = '.xls';
+        $extension = '.xlsx';
+        $filename = 'Reporte_Comprobantes_' . date("d-m-Y") . '---' . rand(1000, 9999) . $extension; //save our workbook as this file name
+        header('Content-Disposition: attachment;filename="' . $filename . '"'); //tell browser what's the file name
+        
+        header('Cache-Control: max-age=0'); //no cache
+        
+        $objWriter->save('php://output');
+	}
+
+
+
 }
+
+
+
+
+

@@ -203,6 +203,13 @@
                               </button>
                               </a>
                           </div>
+                          <div class="btn-group">                                  
+                              <button id="btn_ventasDia" type="button" class="btn btn-nav" style="padding: 6px;">
+                                  <span class="glyphicon glyphicon-download-alt fa-2x"></span>
+                                  <p class="hidden-xs">Export</p>
+                              </button>
+                              </a>
+                          </div>
                   <?php if(@$sup_vta==true){ ?>
                           <div class="btn-group">
                               <button type="button" id="btn_borrar_venta" class="btn btn-nav">
@@ -345,24 +352,29 @@
                   <div class="panel panel-default custom"><span class="glyphicon glyphicon-print"></span> IMPRIMIR TICKET</div>
                     <div class="col-md-12">
                       <form action="#" method="post" enctype="multipart/form-data" name="frmcliente" id="frmcliente">
-                        <div class="col-xs-2">
+                        <div class="col-xs-4">
                           <label for="tpo_doc" class="text-right">Tipo Doc. (*)</label>
                           <select class="form-control" id="tpo_doc" name="tpo_doc">
                           <option value="DNI">DNI</option>
                           <option value="RUC">RUC</option>
+                          <option value="CEXT">Carnet de extranjería</option>
+                          <option value="PASS">PASAPORTE</option>
                           </select>
                         </div>
-                        <div class="col-xs-3">
+                        <div class="col-xs-4">
                         <label for="nro_doc" class="text-right">RUC / DNI (*)</label>
                           <input class="form-control" style="text-transform: uppercase;" name="nro_doc" id="nro_doc" type="text" value="" placeholder="ESCRIBA..." onkeyup="javascript:this.value=this.value.toUpperCase();">
                         </div>
-                        <div class="col-xs-6">
-                          <label for="razon_social" class="text-right">Razon Social /Apellidos y Nombres (*)</label>
-                          <input class="form-control" style="text-transform: uppercase;" name="razon_social" id="razon_social" type="text" value="" placeholder="Apellidos y Nombres">
+                        <div class="col-xs-1" style="margin-top: 1.8em">
+                          <button type="button" id="buscarClienteSumat" name="buscarClienteSumat" class="btn btn-info" >SUNAT</button>
                         </div>
                         <div class="col-xs-1" style="margin-top: 1.8em">
                           <button type="button" id="btncrearCliente" name="btncrearCliente" class="btn btn-default" disabled>Guardar</button>
                         </div>
+                        <div class="col-xs-6">
+                          <label for="razon_social" class="text-right">Razon Social /Apellidos y Nombres (*)</label>
+                          <input class="form-control" style="text-transform: uppercase;" name="razon_social" id="razon_social" type="text" value="" placeholder="Apellidos y Nombres">
+                        </div>                        
                         <div class="col-xs-6">
                           <input name="email" id="email" type="hidden" value="" placeholder="cliente@dominio.com">
                         </div>

@@ -1,5 +1,7 @@
 $(document).ready(function() {
     //alert('11111');
+    // let fecha = moment().format('YYYY-MM-DD')
+    // console.log('fecha', fecha)
     jQuery("#nro_doc").on('input', function(evt) {
         // Allow only numbers.
         jQuery(this).val(jQuery(this).val().replace(/[^0-9]/g, ''));
@@ -33,7 +35,6 @@ $(document).ready(function() {
         "scrollCollapse": true,
         "info": false
     });
-
     //$('#tb_lista_prod_length, #tb_lista_prod_filter, #tb_lista_prod_info, #tb_lista_prod_paginate').hide();
     $('#tb_lista_prod_filter, #tb_lista_prod_dc_filter').hide();
 
@@ -567,10 +568,12 @@ $(document).ready(function() {
         } else if (doc_pago == 1 && (tipo_doc != 'RUC' || nruc.length != 11)) { //factura
             swal("Punto de Venta", "Para generar la Factura debe Ingresar un documeno tipo RUC!", "warning");
             return false;
-        } else if (doc_pago == 2 && (tipo_doc != 'DNI' || nruc.length != 8)) { //boleta
-            swal("Punto de Venta", "Solo puede Generar una Boleta con DNI VALIDO", "warning");
-            return false;
-        } else if (parseFloat(vuelto_cliente) > 0 && tipo_pago != 1) { //boleta
+        }
+        /*else if (doc_pago == 2 && (tipo_doc != 'DNI' || nruc.length != 8)) { //boleta
+                   swal("Punto de Venta", "Solo puede Generar una Boleta con DNI VALIDO", "warning");
+                   return false;
+               } */
+        else if (parseFloat(vuelto_cliente) > 0 && tipo_pago != 1) { //boleta
             swal("Punto de Venta", "No se puede Tener Vuelto en medio de pago que no sea efectivo", "warning");
             return false;
         } else {
@@ -597,7 +600,7 @@ $(document).ready(function() {
                     tipo_doc: tipo_doc,
                 },
                 success: function(result) {
-                    console.log('result', result)
+                    // console.log('result', result)
                     window.location.href = url_web + module_id;
                     $("#btngenerarVentaPrint").html('<h5><span class="glyphicon glyphicon-print"></span> PRINT VENTA</h5>');
                     if (!result.error) {
@@ -1538,6 +1541,19 @@ function imprimirCambioTurno() {
 }
 
 function imprimirCierreCaja() {
+    let fecha = moment().format('YYYY-MM-DD')
+    $.ajax({
+        url: url_web + 'ventas/generarResumenDiario',
+        type: 'POST',
+        data: { fecha: fecha },
+        success: function(result) {
+            buscarComprobante()
+        },
+        error: function(jqXHR, textStatus, error) {
+            // console.log('jqXHR', jqXHR)
+            swal("Error", jqXHR.responseText, "error");
+        }
+    });
 
     swal({
             title: "¿Desea realizar el cierre de Caja?",
@@ -1562,8 +1578,6 @@ function imprimirCierreCaja() {
                         type: "success",
                         html: true,
                         closeOnConfirm: true
-                    }, function() {
-                        window.location.href = url_web + module_id;
                     });
                 },
                 error: function(jqXHR, textStatus, error) {
@@ -1706,26 +1720,81 @@ const anularVta = (id_transac) => {
     swal({
         title: "Punto de Venta",
         text: "Desea Anular esta Venta?",
-        type: "warning",
-        closeOnConfirm: true,
+        type: "input",
         showCancelButton: true,
-    }, function() {
+        closeOnConfirm: false,
+        animation: "slide-from-top",
+        inputPlaceholder: "Ingrese un sustento",
+        showLoaderOnConfirm: true
+    }, function(inputValue) {
+        if (inputValue === false) return false;
+        else if (inputValue.trim() === "") {
+            swal.showInputError("Necesitas Ingresar Un sustento de la Anulación");
+            return false
+        } else {
+            $.ajax({
+                url: url_web + module_id + '/anularVta',
+                type: "POST",
+                data: { id_transac: id_transac, motivo: inputValue },
+                success: function(data) {
+                    // console.log('data', data)
+                    swal({
+                        title: "Punto de Venta",
+                        text: "Se Anuló la Venta",
+                        type: "success",
+                        closeOnConfirm: true
+                    }, function() {
+                        window.location.href = url_web + module_id;
+                    });
+                }
+            })
+        }
+    });
+}
+
+$('#buscarClienteSumat').click(() => {
+    let numdoc = $('#nro_doc').val()
+    let tipodoc = $('#tpo_doc').val()
+    if (tipodoc == 'DNI' || tipodoc == 'RUC') {
         $.ajax({
-            url: url_web + module_id + '/anularVta',
-            type: "POST",
-            data: { id_transac: id_transac },
+            url: `https://consultaruc.win/api/${tipodoc.toLowerCase()}/${numdoc}`,
+            type: "GET",
             success: function(data) {
-                // console.log('data', data)
-                swal({
-                    title: "Punto de Venta",
-                    text: "Se Anuló la Venta",
-                    type: "success",
-                    closeOnConfirm: true
-                }, function() {
-                    window.location.href = url_web + module_id;
-                });
+                console.log('data', data.response)
+                let a = data.result
+                    // $('#nro_doc').val()
+                if (data.response.toString() == 'true') {
+                    if (a.DNI) {
+                        console.log(a)
+                        $('#razon_social').val(`${a.Paterno} ${a.Materno} ${a.Nombre}`)
+                    } else {
+                        console.log('adasfd', a)
+                        $('#razon_social').val(a.razon_social)
+                    }
+                } else {
+                    $('#razon_social').val('')
+                    $("#hdid_cliente").val('');
+                }
             }
         })
-    });
+    }
 
+})
+$('#btn_ventasDia').click(() => {
+    let fecha = moment().format('YYYY-MM-DD')
+        // console.log('fecha', fecha)
+    let url = url_web + '/ventas/exportventas/' + fecha;
+    window.open(url, '_blank');
+})
+
+const buscarComprobante = () => {
+    let i = 0
+    setInterval(() => {
+        i = i + 1
+        console.log("Ejecutar cada 10 seg=> ", i)
+        $.ajax({
+            url: `${url_web}/facturador/validarResumen`,
+            type: "GET",
+        })
+    }, 10000);
 }

@@ -527,5 +527,11 @@ class Tpv_model extends CI_Model {
 		return $lis[0]->valor;
 	}
 
-	
+	public function obtdatoCliente($prefijo){
+		
+		$this->db->where("prefijo", $prefijo);
+		$query = $this->db->get('tb_tipo_documento');
+		$lis = $query->result();
+		return $lis[0]->codigo;
+	}
 }

@@ -44,10 +44,10 @@ class Tpv extends Secure_area {
 		$this->cod_categoria = '1001';
 		$this->g_espacio_print = "    "; 
 
-		$this->g_ruta_printer_simple ='TEST'; 
-		$this->g_ruta_printer_simple_precuenta = 'TEST'; 
-		$this->g_ruta_printer_cocina = 'TEST';  
-		$this->g_ruta_printer_barra = 'TEST'; 
+		$this->g_ruta_printer_simple ='TH230'; 
+		$this->g_ruta_printer_simple_precuenta = 'TH230'; 
+		$this->g_ruta_printer_cocina = 'TH230';  
+		$this->g_ruta_printer_barra = 'TH230'; 
 
 		$data['modo'] = '';
 		$this->load->vars($data);
@@ -674,10 +674,12 @@ class Tpv extends Secure_area {
 		}elseif ($id_serie == 1 && $id_cliente==0 ) { //factura con id 0
 			echo json_encode ( array('error'=>"Para generar la Factura debe Seleccionar un RUC valido."));
             return;
-		}elseif ($id_serie == 2 && ($tp_nruc != 'DNI' || strlen($nruc)  != 8)) { //boleta
+		} 
+		/*elseif ($id_serie == 2 && ($tp_nruc != 'DNI' || strlen($nruc)  != 8)) { //boleta
 			echo json_encode ( array('error'=>"Solo puede Generar una Boleta con DNI VALIDO!"));
             return;
-        }else if ($vuelto_cliente  > 0 && $tipo_pago != 1) { //boleta
+        } */ 
+		else if ($vuelto_cliente  > 0 && $tipo_pago != 1) { //boleta
 			echo json_encode ( array('error'=>"No se puede Tener Vuelto en medio de pago que no sea efectivo!","vuelto"=>$vuelto_cliente,"tipo_pago"=> $tipo_pago));
             return ;
         }elseif($total_venta_f > $pago_cliente) {
@@ -811,6 +813,8 @@ class Tpv extends Secure_area {
 		}
 		$date_created =mdate("%Y-%m-%d", time()).'T'.mdate("%H:%i:%s", time());
 		
+		$tipo_doc_sunat = $this->tpv_model->obtdatoCliente($tp_nruc);
+
 		$data = array(
 						'num_doc' => $tdoc.'-'.$sfactu.'-'.$nfactu,
 						'subtotal_venta' => $subtotal_venta,
@@ -839,6 +843,7 @@ class Tpv extends Secure_area {
 						'n_rs'=>$rsoc ,
 						'tp_ruc'=>$tp_nruc,
 						'anulado'=>'NO',
+						'tipo_doc_sunat'=>$tipo_doc_sunat ,
 					);
 		$id_transac = $this->tpv_model->insertarTransacVenta($data);
 
@@ -858,6 +863,7 @@ class Tpv extends Secure_area {
 								'categoria' => $value->categoria,
 								'cantidad' => $value->cantidad,
 								'venta' => $value->venta,
+								'unidad' => $value->unidad,
 								'total' => $total
 							);
 				$this->tpv_model->insertarTransacVentaDetalle($data);
@@ -883,6 +889,7 @@ class Tpv extends Secure_area {
 										'categoria' => $value->categoria,
 										'cantidad' => $value->cantidad,
 										'venta' => $value->venta,
+										'unidad' => $value->unidad,
 										'total' => $total
 									);
 					$this->tpv_model->insertarTransacVentaDetalle($data);
@@ -893,7 +900,7 @@ class Tpv extends Secure_area {
 			}
 		} 
 		// ************** PROCESO SUNAT ************** //
-		if ($id_serie == 1 || $id_serie == 2) // FACTURA // BOLETA
+		if ($id_serie == 1 /* || $id_serie == 2 */) // FACTURA // BOLETA
 		{
 			$ruta_dat_sunat = 'C:\SUNAT\sunat_archivos\sfs\DATA/';
 			// GENERAR ARCHIVO .CAB
@@ -909,14 +916,14 @@ class Tpv extends Secure_area {
 		        {
 		            foreach ($transac_venta as $value)
 		            {
-		            	if($id_serie == 1) { // Factura
-			                // $lis_cliente = $this->tpv_model->verClienteVenta($id_cliente);
-			                $valor_adquiriente = '6|'.$nruc.'|'.$rsoc;
-			            } else // Boleta
-			                $valor_adquiriente = '1|'.$nruc.'|'.$rsoc;
+		            	// if($id_serie == 1) { // Factura
+			            //     // $lis_cliente = $this->tpv_model->verClienteVenta($id_cliente);
+			            //     $valor_adquiriente = '6|'.$nruc.'|'.$rsoc;
+			            // } else // Boleta
+			            //     $valor_adquiriente = '1|'.$nruc.'|'.$rsoc;
 
 	                 	//$line = '0101|'.date('Y-m-d').'|'.date('H:i:s').'|-|0000|'.$valor_adquiriente.'|PEN|'.$value->igv.'|'.$value->subtotal_venta.'|'.$value->total_venta.'|0.00|0.00|0.00|'.$value->total_venta.'|2.1|2.0|';
-			                $line = '0101|'.date('Y-m-d').'|'.date('H:i:s').'|-|0000|'.$valor_adquiriente.'|PEN|'.round($value->igv,2).'|'.$value->subtotal_venta.'|'.number_format($value->igv+$value->subtotal_venta, 2).'|0.00|'.number_format($value->total_venta - ($value->igv+$value->subtotal_venta), 2).'|0.00|'.$value->total_venta.'|2.1|2.0|';
+			            $line = '0101|'.date('Y-m-d').'|'.date('H:i:s').'|-|0000|'.$tipo_doc_sunat.'|'.$nruc.'|'.$rsoc.'|PEN|'.round($value->igv,2).'|'.$value->subtotal_venta.'|'.number_format($value->igv+$value->subtotal_venta, 2).'|0.00|'.number_format($value->total_venta - ($value->igv+$value->subtotal_venta), 2).'|0.00|'.$value->total_venta.'|2.1|2.0|';
 	                    fwrite($archivo, $line);
 		            }
 		            fclose($archivo);
@@ -959,7 +966,7 @@ class Tpv extends Secure_area {
 						}						
 
 						// |-|0.00|0.00||||0.00|-|0.00|0.00|||0.00| = |-|0.00|0.00||||
-	                	$line = 'NIU|'.$value->cantidad.'|1|-|'.$value->producto.'|'.round($subtotal_venta/$value->cantidad, 2).'|'.round($igv_det, 2).'|1000|'.round($igv_det, 2).'|'.round($subtotal_venta, 2).'|IGV|VAT|10|'.number_format($this->g_igv, 2).
+	                	$line = ''.$value->unidad.'|'.$value->cantidad.'|1|-|'.$value->producto.'|'.round($subtotal_venta/$value->cantidad, 2).'|'.round($igv_det, 2).'|1000|'.round($igv_det, 2).'|'.round($subtotal_venta, 2).'|IGV|VAT|10|'.number_format($this->g_igv, 2).
 								'|-|0.00|0.00||||0.00|-|0.00|0.00|||'.
 	                			$icbper_line.
 	                			number_format(round($m_precio_ven_uni/$value->cantidad, 2), 2).'|'.round($subtotal_venta, 2).'|0.00|'."\r\n";
@@ -1019,24 +1026,24 @@ class Tpv extends Secure_area {
 		    }
 		    // --
 		}
-		// elseif ($id_serie == 2){
-		// 	$transac_venta_deta = $this->tpv_model->listarTransacVentaDetalle($id_transac);
-		// 	$icbper_total = 0.00;
-		// 	$icbper_cant = 0;
-		// 	foreach ($transac_venta_deta as $value)
-		// 	{
-		// 		if($value->categoria == 'BOLSAS')
-		// 		{
-		// 			$lis_icbper = $this->tpv_model->verTaxAnioBolsa(date('Y'));
-		// 			$icbper_tax = $lis_icbper[0]->monto;	
-		// 			$icbper_total = $icbper_total + round($value->cantidad * $icbper_tax, 2);
-		// 			$icbper_cant = $icbper_cant + $value->cantidad;
-		// 		}
-		// 	}
-		// 	// Actualiza "ICBPER"
-		// 	$data = array('icbper_total' => $icbper_total, 'icbper_cant' => $icbper_cant);
-		// 	$this->tpv_model->actualizarTransacVenta($data, $id_transac);
-		// }
+		elseif ($id_serie == 2){
+			$transac_venta_deta = $this->tpv_model->listarTransacVentaDetalle($id_transac);
+			$icbper_total = 0.00;
+			$icbper_cant = 0;
+			foreach ($transac_venta_deta as $value)
+			{
+				if($value->categoria == 'BOLSAS')
+				{
+					$lis_icbper = $this->tpv_model->verTaxAnioBolsa(date('Y'));
+					$icbper_tax = $lis_icbper[0]->monto;	
+					$icbper_total = $icbper_total + round($value->cantidad * $icbper_tax, 2);
+					$icbper_cant = $icbper_cant + $value->cantidad;
+				}
+			}
+			// Actualiza "ICBPER"
+			$data = array('icbper_total' => $icbper_total, 'icbper_cant' => $icbper_cant);
+			$this->tpv_model->actualizarTransacVenta($data, $id_transac);
+		}
 	    // ************** ************ ************** //
 
 
@@ -1054,16 +1061,16 @@ class Tpv extends Secure_area {
 		if ($id_serie == 1 || $id_serie == 2) // FACTURA / BOLETA - ELECTRONICA
 		{
             $transac_venta = $this->tpv_model->listarTransacVentaCAB($id_transac);
-			$lis_cliente = $this->tpv_model->verClienteVenta($id_cliente);
-            if($id_serie == 1) { // Factura
+			//$lis_cliente = $this->tpv_model->verClienteVenta($id_cliente);
+            // if($id_serie == 1) { // Factura
                 
+            //     $valor_QR = $this->g_ruc.'|'.$tdoc.'|'.$sfactu.'|'.$nfactu.
+            //                 '|'.$transac_venta[0]->igv.'|'.$transac_venta[0]->total_venta.
+            //                 '|'.date('Y-m-d').'|6|'.$nruc;
+            // } else // Boleta
                 $valor_QR = $this->g_ruc.'|'.$tdoc.'|'.$sfactu.'|'.$nfactu.
                             '|'.$transac_venta[0]->igv.'|'.$transac_venta[0]->total_venta.
-                            '|'.date('Y-m-d').'|6|'.$lis_cliente[0]->nro_doc;
-            } else // Boleta
-                $valor_QR = $this->g_ruc.'|'.$tdoc.'|'.$sfactu.'|'.$nfactu.
-                            '|'.$transac_venta[0]->igv.'|'.$transac_venta[0]->total_venta.
-                            '|'.date('Y-m-d').'|1|'.$lis_cliente[0]->nro_doc;
+                            '|'.date('Y-m-d').'|'.$tipo_doc_sunat.'|'.$nruc;
                         
             $this->generarFacBolElectronica($id_serie,  $sfactu, $nfactu , $moneda_ticket, $lis_tv, $lis_tv_deta, $lis_t_pago, $dato_mesa, $usuario_venta, $hora_fin, $valor_QR, $fecha_registro) ;
 		}
@@ -1078,9 +1085,9 @@ class Tpv extends Secure_area {
 			
 			if(@$cliente_activo == 'ok')
 			{
-				$lis_cliente = $this->tpv_model->verClienteVenta($id_cliente);
-				$cuerpo_tck .= "RUC     : ".$lis_cliente[0]->nro_doc."\n";
-				$cuerpo_tck .= "Cliente : ".$lis_cliente[0]->razon_social."\n";
+				// $lis_cliente = $this->tpv_model->verClienteVenta($id_cliente);
+				$cuerpo_tck .= "Nro Doc : ".$nruc."\n";
+				$cuerpo_tck .= "Cliente : ".$rsoc."\n";
 				$cuerpo_tck .= "====================================\n";
 			}
 
@@ -1170,38 +1177,6 @@ class Tpv extends Secure_area {
 		$this->tpv_model->actualizarTMPTpvCab($data, $id_tmp_cab);
 	}
 
-	public function imagen(){
-		try
-	    {
-			$connector = new WindowsPrintConnector($this->g_ruta_printer_simple);
-			$printer = new Printer($connector);
-			$logo = EscposImage::load(APPPATH . "libraries/escpos/example/resources/logo_fs_3.jpeg", false);
-			
-			$printer -> setJustification(Printer::JUSTIFY_CENTER);
-			$printer -> bitImage($logo);
-			$printer -> feed(2);
-			$printer -> text("------------------------\n");
-			$printer -> setFont(Printer::FONT_B);
-			$printer -> setTextSize(2, 2);
-			$printer -> text("Policínico\n");
-			$printer -> setFont(Printer::FONT_A);
-			$printer -> setTextSize(2, 2);
-			$printer -> text("Carapongo\n");
-			$printer -> setFont(Printer::FONT_C);
-			$printer -> setTextSize(2, 1);
-			$printer -> text("Medical Center\n");
-			$printer -> feed(2);
-			$printer -> cut();
-			$printer -> pulse();
-			$printer -> close();
-
-		} 
-		catch (Exception $e) 
-		{
-		    echo "Couldn't print to this printer: " . $e -> getMessage() . "\n";
-		}
-	}
-
 	public function cabecera(){
 		$connector = new WindowsPrintConnector($this->g_ruta_printer_simple);
 		$printer = new Printer($connector);
@@ -1230,18 +1205,20 @@ class Tpv extends Secure_area {
 
 		$printer -> close();
 	}
+
     public function generarFacBolElectronica($id_serie, $sfactu, $nfactu, $moneda_ticket, $lis_tv, $lis_tv_deta, $lis_t_pago, $dato_mesa, $usuario_venta, $hora_fin, $valor_QR , $fecha_registro)
-    {
+    // public function generarFacBolElectronica($id_transac)
+	{
         try
 	    {
 			
+
 			$subtotal = $this->obtenerTotalesVentaTK('Subtotal', $lis_tv[0]->subtotal_venta); //new item('Subtotal', $lis_tv[0]->subtotal_venta);
 			$tax = $this->obtenerTotalesVentaTK('I.G.V', $lis_tv[0]->igv);
 			$total = $this->obtenerTotalesVentaTK('Total', $lis_tv[0]->total_venta, true);
             
 			$text_tipo_pago = str_pad($lis_t_pago[0]->tipo_pago, 25 ," ", STR_PAD_LEFT); 
-			
-            
+			            
             if($lis_t_pago[0]->id_tp == 1) { //Pago Efectivo
                 $tipo_pago = $this->obtenerTotalesVentaTK($text_tipo_pago, $lis_tv[0]->pago_cliente);
                 $vuelto = $this->obtenerTotalesVentaTK('Cambio', $lis_tv[0]->vuelto);
@@ -1249,7 +1226,6 @@ class Tpv extends Secure_area {
 			$tipo_pago = $this->obtenerTotalesVentaTK($text_tipo_pago, $lis_tv[0]->pago_cliente);
             
             
-			/* Date is kept the same for testing */
 			$date = mdate("%d/%m/%y", time()).' '.$hora_fin;
 			
 			/* Start the printer */
@@ -1364,14 +1340,14 @@ class Tpv extends Secure_area {
             $printer -> selectPrintMode();
             
             
-			$lis_cliente = $this->tpv_model->verClienteVenta($lis_tv[0]->id_cliente);
-			if($lis_cliente[0]->tipo_doc=="RUC"){$t_doc="RS  :";}else {$t_doc="CLIENTE:";}
+			// $lis_cliente = $this->tpv_model->verClienteVenta($lis_tv[0]->id_cliente);
+			if($lis_tv[0]->tp_ruc=="RUC"){$t_doc="RS  :";}else {$t_doc="CLIENTE:";}
 
 			$printer -> text("\n");
 			$printer -> setJustification(Printer::JUSTIFY_CENTER);
 			$printer -> setEmphasis(true);
-			$printer -> text($lis_cliente[0]->tipo_doc.': '.$lis_cliente[0]->nro_doc."\n");
-			$printer -> text($t_doc.$lis_cliente[0]->razon_social."\n");
+			$printer -> text($lis_tv[0]->tp_ruc.': '.$lis_tv[0]->n_ruc."\n");
+			$printer -> text($t_doc.$lis_tv[0]->n_rs."\n");
 			$printer -> setEmphasis(false);
 			$printer -> selectPrintMode();
             			
@@ -2546,11 +2522,13 @@ class Tpv extends Secure_area {
 	public function anularVta()
 	{
 		$id_transac = $this->input->post('id_transac');
+		$motivo = $this->input->post('motivo');
 		$fechahora = mdate("%Y-%m-%d", time()).'T'.mdate("%H:%i:%s", time());
 		$persona_upd = $this->session->userdata('person_id') ;
 				
 		$data = array(
 			'anulado' => 'SI',  
+			'glosa' => $motivo,
 			'persona_id_updated' => $persona_upd ,
 			'date_updated' => $fechahora
 		);
@@ -2560,5 +2538,12 @@ class Tpv extends Secure_area {
 		);
 		
 		$this->tpv_model->updatetransac($where, $data);
+	}
+
+
+	public function prueba(){
+		$tp_nruc='RUC';
+		$tipo_doc_sunat = $this->tpv_model->obtdatoCliente($tp_nruc);
+		echo $tipo_doc_sunat;
 	}
 }
