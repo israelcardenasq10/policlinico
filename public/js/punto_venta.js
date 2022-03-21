@@ -751,8 +751,13 @@ $(document).ready(function() {
                         },
                         { "data": "num_doc" },
                         { "data": "fecha_registro" },
-                        { "data": "username" },
-                        { "data": "alias" },
+                        {
+                            "render": function(data, type, row) {
+
+                                return `${row.tp_ruc} : ${row.n_ruc}`;
+                            }
+                        },
+                        { "data": "n_rs" },
                         // { "data": "tipo_pago" },
                         {
                             "render": function(data, type, row) {
@@ -765,8 +770,8 @@ $(document).ready(function() {
                                 return `${row.id_cierre?'C':'A'}`;
                             }
                         },
-                        { "data": "subtotal_venta" },
-                        { "data": "igv" },
+                        // { "data": "subtotal_venta" },
+                        // { "data": "igv" },
                         { "data": "total_venta" }
 
                     ],
@@ -1541,19 +1546,19 @@ function imprimirCambioTurno() {
 }
 
 function imprimirCierreCaja() {
-    let fecha = moment().format('YYYY-MM-DD')
-    $.ajax({
-        url: url_web + 'ventas/generarResumenDiario',
-        type: 'POST',
-        data: { fecha: fecha },
-        success: function(result) {
-            buscarComprobante()
-        },
-        error: function(jqXHR, textStatus, error) {
-            // console.log('jqXHR', jqXHR)
-            swal("Error", jqXHR.responseText, "error");
-        }
-    });
+    // let fecha = moment().format('YYYY-MM-DD')
+    // $.ajax({
+    //     url: url_web + 'ventas/generarResumenDiario',
+    //     type: 'POST',
+    //     data: { fecha: fecha },
+    //     success: function(result) {
+    //         buscarComprobante()
+    //     },
+    //     error: function(jqXHR, textStatus, error) {
+    //         // console.log('jqXHR', jqXHR)
+    //         swal("Error", jqXHR.responseText, "error");
+    //     }
+    // });
 
     swal({
             title: "¿Desea realizar el cierre de Caja?",

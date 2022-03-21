@@ -32,7 +32,7 @@
 
 <div class="container-fluid">
   <div class="row">          
-      <div class="col-md-6" >
+      <div class="col-md-5" >
         <div class="row" style="margin-left: 0px; margin-right: 0px; color: white; margin-bottom: 5px;">
             <div class="col-xs-12" style="background-color: #707376; border-radius: 14px 14px 0px 0px; line-height: 30px;">
                 <div class="col-xs-3 " style="padding-left: 3px;" >Encargado <span class="badge" id="td_encargado">-</span></div>
@@ -248,7 +248,7 @@
             </div>
         </div>
       </div>
-      <div class="col-md-6">
+      <div class="col-md-7">
         <div id="exTab3" class="">
           <ul  class="nav nav-pills">
             <li class="active"><a href="#empleados" id="tab_empleado" data-toggle="tab" class="glyphicon glyphicon-home" style="color: cyan;"> Empleados</a></li>
@@ -453,12 +453,12 @@
                         <th width="3%"></th>
                         <th># VTA</th>
                         <th>Fecha</th>
-                        <th>BARISTA</th>
-                        <th>MESA</th>
+                        <th>NroDoc</th>
+                        <th>Cliente</th>
                         <th>TP</th>
                         <th>CIERRE</th>
-                        <th>NETO (S/)</th>
-                        <th>IGV (S/)</th>
+                        <!-- <th>NETO (S/)</th> -->
+                        <!-- <th>IGV (S/)</th> -->
                         <th>TOTAL (S/)</th>
                       </tr>
                     </thead>
