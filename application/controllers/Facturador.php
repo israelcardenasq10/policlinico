@@ -153,7 +153,7 @@ class Facturador extends Secure_area {
 		$lista_sqlite = $resultado->fetchAll(PDO::FETCH_OBJ);
 		
 		foreach($lista_sqlite as $rs){
-			if($rs->IND_SITU='05' && substr($rs->NUM_DOCU,0,2)=='RC'){
+			if($rs->IND_SITU=='05' && substr($rs->NUM_DOCU,0,2)=='RC'){
 				foreach($resumenes  as $val){
 				if($val->NOM_ARCH == $rs->NOM_ARCH){
 					$baseDeDatos = new PDO("sqlite:C:\SUNAT\bd\BDFacturador.db");
