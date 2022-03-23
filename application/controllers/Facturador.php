@@ -153,7 +153,7 @@ class Facturador extends Secure_area {
 		$lista_sqlite = $resultado->fetchAll(PDO::FETCH_OBJ);
 		
 		foreach($lista_sqlite as $rs){
-			if($rs->IND_SITU!='03' && substr($rs->NUM_DOCU,0,2)=='RC'){
+			if($rs->IND_SITU='05' && substr($rs->NUM_DOCU,0,2)=='RC'){
 				foreach($resumenes  as $val){
 				if($val->NOM_ARCH == $rs->NOM_ARCH){
 					$baseDeDatos = new PDO("sqlite:C:\SUNAT\bd\BDFacturador.db");
@@ -162,12 +162,12 @@ class Facturador extends Secure_area {
 					$resultado = $baseDeDatos->exec($update);
 				}
 				}
-			}else if($rs->IND_SITU!='03' && substr($rs->NUM_DOCU,0,1)=='F'){
+			}/*else if($rs->IND_SITU='05' && substr($rs->NUM_DOCU,0,1)=='F'){
 					$baseDeDatos = new PDO("sqlite:C:\SUNAT\bd\BDFacturador.db");
 					$baseDeDatos->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 					$update="UPDATE DOCUMENTO SET IND_SITU='02' WHERE NOM_ARCH='$rs->NOM_ARCH';";
 					$resultado = $baseDeDatos->exec($update);
-			}
+			}*/
 		}
 
 	}

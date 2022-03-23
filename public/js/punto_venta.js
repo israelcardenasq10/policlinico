@@ -1546,19 +1546,19 @@ function imprimirCambioTurno() {
 }
 
 function imprimirCierreCaja() {
-    // let fecha = moment().format('YYYY-MM-DD')
-    // $.ajax({
-    //     url: url_web + 'ventas/generarResumenDiario',
-    //     type: 'POST',
-    //     data: { fecha: fecha },
-    //     success: function(result) {
-    //         buscarComprobante()
-    //     },
-    //     error: function(jqXHR, textStatus, error) {
-    //         // console.log('jqXHR', jqXHR)
-    //         swal("Error", jqXHR.responseText, "error");
-    //     }
-    // });
+    let fecha = moment().format('YYYY-MM-DD')
+    $.ajax({
+        url: url_web + 'ventas/generarResumenDiario',
+        type: 'POST',
+        data: { fecha: fecha },
+        success: function(result) {
+            buscarComprobante()
+        },
+        error: function(jqXHR, textStatus, error) {
+            // console.log('jqXHR', jqXHR)
+            swal("Error", jqXHR.responseText, "error");
+        }
+    });
 
     swal({
             title: "¿Desea realizar el cierre de Caja?",

@@ -88,10 +88,11 @@ function cargartablaresumen() {
                     // { "data": "id_resumen" },
                     {
                         "render": function(data, type, row) {
-                            return `<div class="btn-group">
-                              <button class="btn btn-sm btn-warning btn1" ticket='${row.ntickect}' arch=${row.NOM_ARCH}>Volver Enviar</button>
-                              <button class="btn btn-sm btn-success btn2" arch=${row.NOM_ARCH} idval=${row.id_resumen}>ObtenerTicket</button>                              
-                            </div>`;
+                            let boton = `<button class="btn btn-sm btn-warning btn1" ticket='${row.ntickect}' arch=${row.NOM_ARCH}>Volver Enviar</button>`
+                            if (row.ntickect == '') {
+                                boton = `<button class="btn btn-sm btn-success btn2" arch=${row.NOM_ARCH} idval=${row.id_resumen}>ObtenerTicket</button>`
+                            }
+                            return `<div class="btn-group">${boton}</div>`;
                         }
                     },
                     { "data": "NOM_ARCH" },
