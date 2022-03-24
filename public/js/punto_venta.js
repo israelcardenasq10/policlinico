@@ -1577,6 +1577,7 @@ function imprimirCierreCaja() {
                 type: 'POST',
                 data: {},
                 success: function(result) {
+                    $('#btncerrar_caja').text('CAJA CERRADA...');
                     swal({
                         title: "Punto de Venta",
                         text: "Cierre de CAJA satisfactoriamente!",

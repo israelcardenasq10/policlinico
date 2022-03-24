@@ -53,7 +53,7 @@ class Productos extends Secure_area {
 	public function insertar()
 	{
 		// $num = $this->generarCod();
-		$fecha_registro = mdate("%Y-%m-%dT", time());
+		$fecha_registro = mdate("%Y-%m-%d", time()).'T'.mdate("%H:%i:%s", time());
 		$data = array(
 					'id_categoria' => $this->input->post('id_categoria'),
 					'producto_comanda_id' => $this->input->post('producto_comanda_id'),
