@@ -14,12 +14,11 @@ class Productos_model extends CI_Model {
 	    //$this->db->join('tb_almacen_productos ap', 'p.id_producto = ap.id_producto');
 	    //$this->db->join('tb_almacen a', 'ap.id_almacen = a.id_almacen');
 	    $this->db->join("tb_empleados b", "p.id_owner = b.person_id");
-	    if(strlen($categoria)==4){
-			$this->db->where("p.id_categoria", $categoria );
-		}
+	    // if(strlen($categoria)==4){
+		// 	$this->db->where("p.id_categoria", $categoria );
+		// }
 		$this->db->order_by("p.nro_producto", "asc");
     	$query = $this->db->get();
-    	//echo "<br/><br/><br/><br/>".$this->db->last_query();
 		return $query->result();
 	}
 
@@ -168,8 +167,8 @@ class Productos_model extends CI_Model {
 
 	public function verNroProductoXCategoria($id_categoria)
 	{
-		//$this->db->select_max("id_producto");
-		$this->db->select("MAX(ABS(nro_producto)) as nro_producto");
+		$this->db->select_max("nro_producto");
+		// $this->db->select("MAX(ABS(nro_producto)) as nro_producto");
 		$this->db->from('tb_productos');
 		$this->db->where('id_categoria', $id_categoria);
 		$query = $this->db->get();

@@ -15,8 +15,6 @@ class Ventas_model extends CI_Model {
 		, tp.tipo_pago
 		, pv.moneda
 		, pv.fecha_registro
-		, ISNULL(tmpcab.hora_ini,'') hora_ini
-		, ISNULL(tmpcab.hora_fin,'') hora_fin
 		, pv.subtotal_venta
 		, pv.igv
 		, pv.total_venta
@@ -24,6 +22,11 @@ class Ventas_model extends CI_Model {
 		, pv.tdoc
 		, pv.isNC
 		");
+		// $this->db->select( "ISNULL(tmpcab.hora_ini,'') hora_ini");
+		// $this->db->select( "ISNULL(tmpcab.hora_fin,'') hora_fin");
+		$this->db->select("tmpcab.hora_ini AS hora_ini");
+		$this->db->select("tmpcab.hora_fin AS hora_fin");
+		
 		$this->db->from('tb_transac_pventa pv');
 		$this->db->join('tb_tipo_pago tp', 'pv.id_tp = tp.id_tp');
 		$this->db->join('tb_tmp_cab_pventa tmpcab', 'pv.id_tmp_cab = tmpcab.id_tmp_cab','left');
@@ -66,9 +69,9 @@ class Ventas_model extends CI_Model {
 
 	public function grupodetcierre($id_cierre)
 	{
-		$this->db->select("tp.tipo_pago,SUM(a.total_venta) AS total_venta");
+		$this->db->select("tp.tipo_pago,SUM(tp.monto) AS total_venta");
 		$this->db->from('tb_transac_pventa a');		
-		$this->db->join('tb_tipo_pago tp', 'a.id_tp=tp.id_tp');		
+		$this->db->join('tb_transac_pventa_mpago tp', 'a.id_transac=tp.id_transac');		
 		$this->db->where('a.id_cierre', $id_cierre);		
 		$this->db->group_by("tp.tipo_pago");
 		$this->db->order_by('tp.tipo_pago', 'ASC');	
@@ -94,14 +97,10 @@ class Ventas_model extends CI_Model {
 
 	public function verVentasXDia($fecha)
 	{
-		$this->db->select("pv.*, tp.tipo_pago, tmpcab.hora_ini, tmpcab.hora_fin, tmpcab.correlativo AS correlativo_venta, tmpcab.estado, e.username, concat(d.last_name, ' ', d.first_name) AS empleado, m.mesa, m.alias");
+		$this->db->select("pv.*,tp.* ");
 		$this->db->from('tb_transac_pventa pv');
-		$this->db->join('tb_tipo_pago tp', 'pv.id_tp = tp.id_tp');
-		// Inner Join para Clientes Aqui!
-		$this->db->join('tb_tmp_cab_pventa tmpcab', 'pv.id_tmp_cab = tmpcab.id_tmp_cab');
-		$this->db->join('tb_empleados e', 'tmpcab.id_emple = e.id');
-		$this->db->join('tb_datos d', 'e.person_id = d.person_id');
-		$this->db->join('tb_pv_mesas m', 'tmpcab.id_mesa = m.id_mesa');
+		$this->db->join('tb_transac_pventa_mpago tp', 'pv.id_transac=tp.id_transac');
+
 		$this->db->where_not_in("pv.tdoc ", array('07','08') );
 		$this->db->where('pv.fecha_registro',$fecha );
 		$this->db->or_where('pv.id_cierre is null');
@@ -130,6 +129,13 @@ class Ventas_model extends CI_Model {
 		return $query->result();
 	}
 
+	public function verDetalleVentaMP($id)
+	{
+		$this->db->where('id_transac', $id);
+		$query = $this->db->get('tb_transac_pventa_mpago');
+		return $query->result();
+	}
+
 	public function listarTP()
 	{
 		$query = $this->db->get('tb_tipo_pago');
@@ -139,7 +145,7 @@ class Ventas_model extends CI_Model {
 	// -- PROCESO CERRAR CAJA
 	public function verTurnoCaja($fecha)
 	{
-		$this->db->select("ISNULL(MAX(turno),'00000') as turno");
+		$this->db->select_max("turno");
 		$this->db->where("fecha_cierre", $fecha);
 		$query = $this->db->get('tb_cerrar_caja');
 		$lis = $query->result();
@@ -151,6 +157,7 @@ class Ventas_model extends CI_Model {
 		$this->db->from('tb_transac_pventa');
 		$this->db->where('id_cierre IS NULL');
 		$this->db->where('anulado','NO');
+		$this->db->where_not_in("tdoc ", array('07','08') );
 		$query = $this->db->get();
 		$lis = $query->result();
 		return $lis[0]->total_venta_turno;
@@ -166,81 +173,84 @@ class Ventas_model extends CI_Model {
 	// 	return $lis[0]->total_venta_turno;
 	// }
 
-	public function verListaVentaCierreCaja($fecha)
-	{
-		$this->db->select("*");
-		$this->db->from('tb_transac_pventa');
-		$this->db->where("fecha_registro", $fecha);
-		$this->db->where("anulado", "NO");
-		// $this->db->where('id_cierre IS NULL');
-		$this->db->order_by("id_tp", "ASC");
-		$query = $this->db->get();
-		return $query->result();
-	}
+	// public function verListaVentaCierreCaja($fecha)
+	// {
+	// 	$this->db->select("*");
+	// 	$this->db->from('tb_transac_pventa');
+	// 	$this->db->where("fecha_registro", $fecha);
+	// 	$this->db->where("anulado", "NO");
+	// 	$this->db->where_not_in("tdoc ", array('07','08') );
+	// 	// $this->db->where('id_cierre IS NULL');
+	// 	$this->db->order_by("id_tp", "ASC");
+	// 	$query = $this->db->get();
+	// 	return $query->result();
+	// }
+
 	public function verListaVentaCierreCajaCTurno($fecha)
 	{
 		$this->db->select("*");
 		$this->db->from('tb_transac_pventa');
 		$this->db->where('id_cierre IS NULL');
-		// $this->db->where('anulado','NO');
-		// $this->db->where("fecha_registro", $fecha);
-		// $this->db->where('id_cierre IS NULL');
-		//$this->db->order_by("id_tp", "ASC");
+		$this->db->where_not_in("tdoc ", array('07','08') );
+
 		$query = $this->db->get();
 		return $query->result();
 	}
+
+	
+
 	public function verListaVentaGrupalesTPCturno($fecha)
 	{
-		$this->db->select("id_tp");
-		$this->db->from('tb_transac_pventa');
-		$this->db->where(" id_cierre IS NULL");
-		$this->db->where("anulado","NO");
-		// $this->db->where("fecha_registro", $fecha);
-		// $this->db->where('id_cierre IS NULL');
-		$this->db->group_by('id_tp'); 
-		$this->db->order_by("id_tp", "ASC");
+		$this->db->select("b.tipo_pago");
+		$this->db->select_sum("b.monto");
+		$this->db->from('tb_transac_pventa a');
+		$this->db->join('tb_transac_pventa_mpago b','b.id_transac = a.id_transac');
+		$this->db->where("a.id_cierre IS NULL");
+		$this->db->where("a.anulado","NO");
+		$this->db->where_not_in("a.tdoc ", array('07','08') );
+		$this->db->group_by('b.tipo_pago'); 
+		$this->db->order_by("b.tipo_pago", "ASC");
 		$query = $this->db->get();
 		return $query->result();
 	}
-	public function verListaVentaGrupalesTP($fecha)
-	{
-		$this->db->select("id_tp");
-		$this->db->from('tb_transac_pventa');
-		$this->db->where("anulado", "NO");
+	// public function verListaVentaGrupalesTP($fecha)
+	// {
+	// 	$this->db->select("id_tp");
+	// 	$this->db->from('tb_transac_pventa');
+	// 	$this->db->where("anulado", "NO");
 
-		$where =" fecha_registro='$fecha' OR id_cierre IS NULL";
-		$this->db->where($where);
-		// $this->db->where("fecha_registro", $fecha);
-		// $this->db->where('id_cierre IS NULL');
-		$this->db->group_by('id_tp'); 
-		$this->db->order_by("id_tp", "ASC");
-		$query = $this->db->get();
-		return $query->result();
-	}
-	//cierre de caja
-	public function verListaVentaXTPago($fecha, $id_tp)
-	{
-		$this->db->select("*");
-		$this->db->from('tb_transac_pventa');
-		$this->db->where("id_tp", $id_tp);
-		$this->db->where("anulado", "NO");
-		$where =" (fecha_registro='$fecha' OR id_cierre IS NULL)";
-		$this->db->where($where);
-		$query = $this->db->get();
-		return $query->result();
-	}
+	// 	$where =" fecha_registro='$fecha' OR id_cierre IS NULL";
+	// 	$this->db->where($where);
+	// 	// $this->db->where("fecha_registro", $fecha);
+	// 	// $this->db->where('id_cierre IS NULL');
+	// 	$this->db->group_by('id_tp'); 
+	// 	$this->db->order_by("id_tp", "ASC");
+	// 	$query = $this->db->get();
+	// 	return $query->result();
+	// }
+	// //cierre de caja
+	// public function verListaVentaXTPago($fecha, $id_tp)
+	// {
+	// 	$this->db->select("*");
+	// 	$this->db->from('tb_transac_pventa');
+	// 	$this->db->where("id_tp", $id_tp);
+	// 	$this->db->where("anulado", "NO");
+	// 	$where =" (fecha_registro='$fecha' OR id_cierre IS NULL)";
+	// 	$this->db->where($where);
+	// 	$query = $this->db->get();
+	// 	return $query->result();
+	// }
 	//cambio de turno
 	public function verListaVentaXTPagoCaja( $id_tp)
 	{
-		$this->db->select("*");
-		$this->db->from('tb_transac_pventa');
-		$this->db->where("id_tp", $id_tp);
-		$this->db->where("anulado", "NO");
-
-		// $where ="(fecha_registro='$fecha' OR id_cierre IS NULL)";
-		// $this->db->where($where);
-		$this->db->where('anulado','NO');
-		$this->db->where('id_cierre IS NULL');
+		$this->db->select("a.num_doc,b.*");
+		$this->db->from('tb_transac_pventa a');
+		$this->db->join('tb_transac_pventa_mpago b','b.id_transac = a.id_transac');
+		$this->db->where("a.id_cierre IS NULL");
+		$this->db->where_not_in("a.tdoc ", array('07','08') );
+		$this->db->where("b.tipo_pago", $id_tp);
+		$this->db->where("a.anulado", "NO");
+;
 		$query = $this->db->get();
 		return $query->result();
 	}
@@ -254,7 +264,7 @@ class Ventas_model extends CI_Model {
 
 	public function verTotalTicketCajaXDia($fecha)
 	{
-		$this->db->select("SUM(total_ticket) AS total_ticket");
+		$this->db->select_sum("total_ticket");
 		$this->db->from('tb_cerrar_caja');
 		$this->db->where("fecha_cierre", $fecha);
 		$query = $this->db->get();
@@ -264,16 +274,16 @@ class Ventas_model extends CI_Model {
 
 	public function verListaVentaGrupalesTPCaja($fecha)
 	{
-		$this->db->select("id_tp");
-		$this->db->from('tb_transac_pventa');
-		// $where =" fecha_registro='$fecha' OR id_cierre IS NULL";
-		// $this->db->where($where);
-		$this->db->where("fecha_registro", $fecha);
-		$this->db->where("anulado", "NO");
-		$this->db->where_not_in("tdoc ", array('07','08') );
-		// $this->db->where('id_cierre IS NULL');
-		$this->db->group_by('id_tp'); 
-		$this->db->order_by("id_tp", "ASC");
+		$this->db->select("b.tipo_pago,count(a.id_transac) AS cantidad");
+		$this->db->select_sum("b.monto");
+		$this->db->from('tb_transac_pventa a');
+		$this->db->join('tb_transac_pventa_mpago b','b.id_transac = a.id_transac');
+		$this->db->join('tb_cerrar_caja c','c.id_cierre = a.id_cierre');
+		$this->db->where("c.fecha_cierre", $fecha);
+		$this->db->where("a.anulado", "NO");
+		$this->db->where_not_in("a.tdoc ", array('07','08') );
+		$this->db->group_by('b.tipo_pago'); 
+		$this->db->order_by("b.tipo_pago", "ASC");
 		$query = $this->db->get();
 		return $query->result();
 	}
@@ -306,8 +316,7 @@ class Ventas_model extends CI_Model {
 		$this->db->where("id_transac", $id);
 		$this->db->update("tb_transac_pventa", $data);	
 	}
-	// --
-
+	
 	
     // Reportes
     public function filtrar($fecha1, $fecha2, $cbo_1, $anulado, $cbo_2)
@@ -318,18 +327,18 @@ class Ventas_model extends CI_Model {
 			$sql .= " WHERE a.id_serie = '$cbo_1'";
 
 		if($cbo_1 == '0' && ($fecha1 != '0' && $fecha2 != '0'))
-			$sql .= " WHERE (a.fecha_registro >= '$fecha1' and a.fecha_registro <= '$fecha2') ";
+			$sql .= " WHERE (a.fecha_creacion >= '$fecha1' and a.fecha_creacion <= '$fecha2') ";
 		
 		if($cbo_1 != '0' && ($fecha1 != '0' && $fecha2 != '0'))
-			$sql .= " WHERE a.id_serie = '$cbo_1' AND (a.fecha_registro >= '$fecha1' and a.fecha_registro <= '$fecha2') ";
+			$sql .= " WHERE a.id_serie = '$cbo_1' AND (a.fecha_creacion >= '$fecha1' and a.fecha_creacion <= '$fecha2') ";
 				
 		if($anulado == 'V')
-			$sql .= "  AND a.estado = 'V' ";
+			$sql .= "  AND a.anulado = 'SI' ";
 		
 		if($cbo_2 > 0)
 			$sql .= "  AND a.id_tp = '$cbo_2' ";
 	
-			$sql .= " ORDER BY a.fecha_registro DESC;";
+			$sql .= " ORDER BY a.fecha_emision DESC;";
 		//echo "<br><br><br>".$sql;
 		$query = $this->db->query($sql);
 		return $query->result();
@@ -363,26 +372,26 @@ class Ventas_model extends CI_Model {
 			
 		$query = $this->db->query($sql);
 		return $query->result();
+
 	}
 
 	public function filtrarVentaBar($fecha1, $fecha2, $cbo_1)
 	{
-		$sql = "SELECT a.nro_doc, a.id, a.barista, a.username, a.fecha, SUM(a.total_venta) AS total_venta FROM EXCEL_VENTAS_BARISTA a";
-		
-		if($cbo_1 != '0' && ($fecha1 == '0' && $fecha2 == '0'))
-			$sql .= " WHERE a.id = '$cbo_1'";
-
-		if($cbo_1 == '0' && ($fecha1 != '0' && $fecha2 != '0'))
-			$sql .= " WHERE (a.fecha >= '$fecha1' and a.fecha <= '$fecha2') ";
-		
-		if($cbo_1 != '0' && ($fecha1 != '0' && $fecha2 != '0'))
-			$sql .= " WHERE a.id = '$cbo_1' AND (a.fecha >= '$fecha1' and a.fecha <= '$fecha2') ";
-						
-			$sql .= " GROUP BY a.nro_doc, a.id, a.barista, a.username, a.fecha";
-			$sql .= " ORDER BY a.fecha DESC;";
-		
-		//echo "<br><br><br>".$sql;
-		$query = $this->db->query($sql);
+		$this->db->select("b.nro_doc, CONCAT(b.first_name,' ',b.last_name) AS usuario
+		, u.username, a.fecha_registro");
+		$this->db->select_sum("a.total_venta");
+		$this->db->from('tb_transac_pventa a');
+		$this->db->join('tb_datos b','b.person_id=a.persona_id_created');
+		$this->db->join('tb_empleados u','u.person_id=a.persona_id_created');
+		$this->db->where("a.anulado", "NO");
+		$this->db->where("a.fecha_registro >=",$fecha1);
+		$this->db->where("a.fecha_registro <=",$fecha2);
+		if($cbo_1!='0')	$this->db->where("u.id", $cbo_1);		
+		$this->db->where_not_in("a.tdoc ", array('07','08') );
+		$this->db->group_by(array('b.nro_doc','a.fecha_registro',
+		"CONCAT(b.first_name,' ',b.last_name)",'u.username')); 
+		$this->db->order_by("b.nro_doc", "ASC");
+		$query = $this->db->get();
 		return $query->result();
 	}
 

@@ -264,7 +264,7 @@ class Reportes_model extends CI_Model {
 			$sql .= " WHERE a.id_serie = '$cbo_1' AND (a.fecha_registro >= '$fecha1' and a.fecha_registro <= '$fecha2') ";
 				
 		if($anulado == 'V')
-			$sql .= "  AND a.estado = 'V' ";
+			$sql .= "  AND a.estado = 'SI' ";
 		
 		if($cbo_2 > 0)
 			$sql .= "  AND a.id_tp = '$cbo_2' ";
@@ -329,7 +329,6 @@ class Reportes_model extends CI_Model {
 
 		// data Body
 		$sql = "SELECT a.nro_doc, a.id, a.barista, a.username, a.fecha, SUM(a.total_venta) AS total_venta FROM EXCEL_VENTAS_BARISTA a ";
-
 		if($cbo_1 != '0' && ($fecha1 == '0' && $fecha2 == '0'))
 			$sql .= " WHERE a.id = '$cbo_1'";
 

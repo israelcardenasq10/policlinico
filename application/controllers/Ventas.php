@@ -70,6 +70,7 @@ class Ventas extends Secure_area {
 		$id_transac = $this->input->post('id_transac');
 		$data['bus_dato'] = $this->ventas_model->ver($id_transac);
 		$data['lista_deta'] = $this->ventas_model->verDetalleVenta($id_transac);
+		$data['lista_mp'] = $this->ventas_model->verDetalleVentaMP($id_transac);
 		echo json_encode($data);
 	}
 	
@@ -107,11 +108,7 @@ class Ventas extends Secure_area {
 					'titulo_main' => 'Reporte de Ventas',
 					'titulo_main_2' => 'Reporte Consolidados',
 					'titulo_main_3' => 'Reporte Detallado',
-					'titulo_main_4' => 'Reporte Ventas Mozos',
-					'titulo_main_5' => 'Reporte Mesas Borradas',
-					'titulo_main_6' => 'Reporte Comandas',
-					'titulo_main_7' => 'Reporte Comandas Anuladas',
-					'titulo_main_8' => 'Reporte Ventas Fin de Mes'
+					'titulo_main_4' => 'Reporte Ventas Usuario',
 				);
 
 		$this->load->view("ventas/report", $data);  
@@ -127,11 +124,7 @@ class Ventas extends Secure_area {
 					'titulo_main' => 'Reporte de Ventas',
 					'titulo_main_2' => 'Reporte Consolidados',
 					'titulo_main_3' => 'Reporte Detallado',
-					'titulo_main_4' => 'Reporte Ventas Mozos',
-					'titulo_main_5' => 'Reporte Mesas Borradas',
-					'titulo_main_6' => 'Reporte Comandas',
-					'titulo_main_7' => 'Reporte Comandas Anuladas',
-					'titulo_main_8' => 'Reporte Ventas Fin de Mes',
+					'titulo_main_4' => 'Reporte Ventas Usuario',
 					'fecha_1' => $fecha1,
 					'fecha_2' => $fecha2,
 					'cbo_1' => $cbo_1,
@@ -151,11 +144,7 @@ class Ventas extends Secure_area {
 					'titulo_main' => 'Reporte de Ventas',
 					'titulo_main_2' => 'Reporte Consolidados',
 					'titulo_main_3' => 'Reporte Detallado',
-					'titulo_main_4' => 'Reporte Ventas Mozos',
-					'titulo_main_5' => 'Reporte Mesas Borradas',
-					'titulo_main_6' => 'Reporte Comandas',
-					'titulo_main_7' => 'Reporte Comandas Anuladas',
-					'titulo_main_8' => 'Reporte Ventas Fin de Mes',
+					'titulo_main_4' => 'Reporte Ventas Usuario',
 					'fecha_1' => $fecha1,
 					'fecha_2' => $fecha2
 				);
@@ -172,11 +161,7 @@ class Ventas extends Secure_area {
 					'titulo_main' => 'Reporte de Ventas',
 					'titulo_main_2' => 'Reporte Consolidados',
 					'titulo_main_3' => 'Reporte Detallado',
-					'titulo_main_4' => 'Reporte Ventas Mozos',
-					'titulo_main_5' => 'Reporte Mesas Borradas',
-					'titulo_main_6' => 'Reporte Comandas',
-					'titulo_main_7' => 'Reporte Comandas Anuladas',
-					'titulo_main_8' => 'Reporte Ventas Fin de Mes',
+					'titulo_main_4' => 'Reporte Ventas Usuario',
 					'fecha_1' => $fecha1,
 					'fecha_2' => $fecha2,
 					'cbo_1' => $cbo_1
@@ -194,11 +179,7 @@ class Ventas extends Secure_area {
 					'titulo_main' => 'Reporte de Ventas',
 					'titulo_main_2' => 'Reporte Consolidados',
 					'titulo_main_3' => 'Reporte Detallado',
-					'titulo_main_4' => 'Reporte Ventas Mozos',
-					'titulo_main_5' => 'Reporte Mesas Borradas',
-					'titulo_main_6' => 'Reporte Comandas',
-					'titulo_main_7' => 'Reporte Comandas Anuladas',
-					'titulo_main_8' => 'Reporte Ventas Fin de Mes',
+					'titulo_main_4' => 'Reporte Ventas Usuario',
 					'fecha_1' => $fecha1,
 					'fecha_2' => $fecha2,
 					'cbo_1' => $cbo_1
@@ -216,11 +197,7 @@ class Ventas extends Secure_area {
 					'titulo_main' => 'Reporte de Ventas',
 					'titulo_main_2' => 'Reporte Consolidados',
 					'titulo_main_3' => 'Reporte Detallado',
-					'titulo_main_4' => 'Reporte Ventas Mozos',
-					'titulo_main_5' => 'Reporte Mesas Borradas',
-					'titulo_main_6' => 'Reporte Comandas',
-					'titulo_main_7' => 'Reporte Comandas Anuladas',
-					'titulo_main_8' => 'Reporte Ventas Fin de Mes',
+					'titulo_main_4' => 'Reporte Ventas Usuario',
 					'fecha_1' => $fecha1,
 					'fecha_2' => $fecha2
 				);
@@ -237,8 +214,8 @@ class Ventas extends Secure_area {
 					'titulo_main' => 'Reporte de Ventas',
 					'titulo_main_2' => 'Reporte Consolidados',
 					'titulo_main_3' => 'Reporte Detallado',
-					'titulo_main_4' => 'Reporte Ventas Mozos',
-					'titulo_main_5' => 'Reporte Mesas Borradas',
+					'titulo_main_4' => 'Reporte Ventas Usuario',
+					
 					'titulo_main_6' => 'Reporte Comandas',
 					'titulo_main_7' => 'Reporte Comandas Anuladas',
 					'titulo_main_8' => 'Reporte Ventas Fin de Mes',
@@ -258,8 +235,8 @@ class Ventas extends Secure_area {
 					'titulo_main' => 'Reporte de Ventas',
 					'titulo_main_2' => 'Reporte Consolidados',
 					'titulo_main_3' => 'Reporte Detallado',
-					'titulo_main_4' => 'Reporte Ventas Mozos',
-					'titulo_main_5' => 'Reporte Mesas Borradas',
+					'titulo_main_4' => 'Reporte Ventas Usuario',
+					
 					'titulo_main_6' => 'Reporte Comandas',
 					'titulo_main_7' => 'Reporte Comandas Anuladas',
 					'titulo_main_8' => 'Reporte Ventas Fin de Mes',
@@ -276,11 +253,11 @@ class Ventas extends Secure_area {
 		$data = array(
 					'lista' => $lista,
 					'nro_report' => 8,
-					'titulo_main' => 'Reporte de Ventas',
+					'titulo_main' =>   'Reporte de Ventas',
 					'titulo_main_2' => 'Reporte Consolidados',
 					'titulo_main_3' => 'Reporte Detallado',
-					'titulo_main_4' => 'Reporte Ventas Mozos',
-					'titulo_main_5' => 'Reporte Mesas Borradas',
+					'titulo_main_4' => 'Reporte Ventas Usuario',
+					
 					'titulo_main_6' => 'Reporte Comandas',
 					'titulo_main_7' => 'Reporte Comandas Anuladas',
 					'titulo_main_8' => 'Reporte Ventas Fin de Mes',

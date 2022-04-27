@@ -1,7 +1,7 @@
 $(document).ready(function() {
 
     var pagina = $("#hdpagina").val();
-    console.log('pagina', pagina)
+    // console.log('pagina', pagina)
 
     // INSERTAR / MODIFICAR
     $("#btnsave").on("click", function() {
@@ -91,6 +91,7 @@ function ver(id, accion) {
             $("#id").val(data[0].id_categoria);
             $("#id_categoria").val(data[0].id_categoria);
             $("#nombre").val(data[0].nombre);
+            $("#prefijo").val(data[0].prefijo);
 
             $("#estado").val(data[0].estado);
             $("#id_categoria").prop("readonly", true);

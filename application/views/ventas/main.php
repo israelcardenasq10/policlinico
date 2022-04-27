@@ -19,7 +19,15 @@
          	if(isset($allowed_modules_accion))
           {
          		$arr_accion = array();
+             $genNC ="N";
           		foreach ($allowed_modules_accion->result() as $key => $lis):
+                if($lis->accion == 'CierreCaja'){
+                  $CierreCaja = true; 
+                }	
+                if($lis->accion == 'genNC'){
+                  $genNC ="Y";
+                }	
+
           			if($modo === 'actualizar')
           			{
           				$disabled = 'pointer-events: none; color: rgba(0,0,0,0.1);';
@@ -55,6 +63,7 @@
         </ul>
         <div class="tab-content">
           <div class="tab-pane active" id="<?=$arr_accion[0]?>"> 
+          <input type="hidden" id="hhdgenNC" value="<?=@$genNC?>">
             <div class="col-md-10">
               <form id="buscarventa" method="POST" >
                 <div class="col-md-2 form-group">
@@ -104,9 +113,9 @@
                   <tr>
                     <th style="width: 10%;"></th>
                     <th># VENTA</th>
-                    <th>BARISTA</th>
+                    <th>USUARIO</th>
                     <th>CLIENTE</th>
-                    <th>MESA</th>
+                    <th>SALA</th>
                     <th>TP</th>
                     <th>MND</th>
                     <th>FECHA</th>
@@ -122,6 +131,9 @@
                 </table>
             </div>
           </div> 
+          <?php
+          if(@$CierreCaja==true){ 
+          ?>
           <div class="tab-pane fade" id="<?=$arr_accion[1]?>">
 						<div class="row">
 							<div class="col-md-2">
@@ -153,7 +165,8 @@
 								</table>
 							</div>
 						</div>
-					</div>             
+					</div>
+          <?php } ?>             
         </div>
       </div>
       <!-- /tabs -->
@@ -199,10 +212,10 @@
                           <div class="form-group row">
                               <label class="col-form-label col-md-3" for="">Mesa</label>
                               <span class="col-md-5" id="vd_mesa"></span>
+                              <input type="hidden" id="hdd_id_transac">
                           </div>
                       </div>                                                
                   </div>
-
                   <div class="row">
                       <div class="col-md-12">
                           <div class="form-group row">
@@ -239,6 +252,7 @@
           </div>
         </div>
         <div class="modal-footer">
+          <button type="button" class="btn btn-info" id="btn_reimpresion">Reimprimir Compobante</button>
           <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
         </div>
       </div>

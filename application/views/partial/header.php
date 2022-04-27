@@ -104,7 +104,7 @@
                   </li>
 
                   <li>
-                    <a href="<?=base_url().'panel/salir'?>" style="padding: 0px 10px;"><img class="img-circle" src="<?=base_url()?>public/images/users/empleados/<?=$de_foto?>" width="45" height="" /></a>
+                    <a href="<?=base_url().'tpv/salir'?>" style="padding: 0px 10px;"><img class="img-circle" src="<?=base_url()?>public/images/users/empleados/<?=$de_foto?>" width="45" height="" /></a>
                   </li>
               </ul>
           </div>

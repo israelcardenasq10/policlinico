@@ -20,6 +20,7 @@
           {
          		$arr_accion = array();
           		foreach ($allowed_modules_accion->result() as $key => $lis):
+           
           			if($modo === 'actualizar' || $modo === 'categorias')
           			{
           				$disabled = 'pointer-events: none; color: rgba(0,0,0,0.1);';
@@ -106,6 +107,7 @@
                             <form action="#" method="post" enctype="multipart/form-data" name="frm1" id="frm1">
                                 <input type="hidden" id="id_producto" name="id_producto" value="<?=$bus_dato[0]->id_producto?>">
                                 <input type="hidden" id="id_file" name="id_file" value="<?=$bus_dato[0]->id_producto?>">
+                                
                                 <div class="col-md-12">
                                     <h2><span class="fa fa-edit fa-1x"></span> Editar <?=ucwords($module_id)?></h2>
                                     <h5>Actualice la información de <?=ucwords($module_id)?></h5>
@@ -150,10 +152,10 @@
                                                               endforeach;?>
                                                         </select>
                                                     </div> -->
-                                                    <div class="col-md-1">
+                                                    <div class="col-md-2">
                                                         <input type="text" class="form-control" readonly name="nro_producto" id="nro_producto" value="<?=$bus_dato[0]->nro_producto?>" placeholder="">
                                                     </div>
-                                                    <label class="form-contro col-md-1">CÓDIGO</label>
+                                                    <!-- <label class="form-contro col-md-1">CÓDIGO</label> -->
                                                     <div class="col-md-3">                                                        
                                                         <input type="text" class="form-control" name="codigo_ant" id="codigo_ant" value="<?=$bus_dato[0]->codigo_ant?>" placeholder="">
                                                     </div>
@@ -199,17 +201,17 @@
                                                     </select>
                                                   </div>
                                                   <div class="col-md-3">
-                                                        <label class="col-form-label" for="unidades">Unidad</label>
-                                                        <select class="form-control" name="unidades" id="unidades">                                                          
-                                                        <?php foreach($lista_unidades as $i=>$lis): 
-                                                            if($lis->valor == $bus_dato[0]->unidades): ?>
-                                                              <option value="<?=$lis->valor?>" selected><?=$lis->descripcion?></option>
-                                                              <?php    else: ?>
-                                                              <option value="<?=$lis->valor?>" ><?=$lis->descripcion?></option>
-                                                        <?php   endif;
-                                                        endforeach;?>
-                                                          </select>
-                                                      </div>
+                                                    <label class="col-form-label" for="unidades">Unidad</label>
+                                                    <select class="form-control" name="unidades" id="unidades">                                                          
+                                                    <?php foreach($lista_unidades as $i=>$lis): 
+                                                        if($lis->valor == $bus_dato[0]->unidades): ?>
+                                                          <option value="<?=$lis->valor?>" selected><?=$lis->descripcion?></option>
+                                                          <?php    else: ?>
+                                                          <option value="<?=$lis->valor?>" ><?=$lis->descripcion?></option>
+                                                    <?php   endif;
+                                                    endforeach;?>
+                                                      </select>
+                                                  </div>
                                                   <div class="col-md-3 text-right">
                                                       <input type="hidden" name="txtmodo" id="txtmodo" value="modificar" /></td>
                                                       <button type="button" id="btnMod" name="btnMod" class="btn btn-primary">Grabar</button>
@@ -403,7 +405,7 @@
                                                           <select class="form-control" name="id_categoria" id="id_categoria" onchange="verNroProducto(this.value);">
                                                           <option value="0"> ----- Seleccione una Categoria ----- </option>
                                                            <?php foreach($lista_categorias_prod as $i=>$lis): ?>
-                                                                 <option value="<?=$lis->id_categoria?>"><?=$lis->nombre?></option>
+                                                                 <option value="<?=$lis->id_categoria?>"><?=$lis->prefijo."-".$lis->nombre?></option>
                                                            <?php endforeach;?>
                                                            </select>
                                                         </div>
@@ -416,10 +418,10 @@
                                                           <?php endforeach;?>
                                                            </select>
                                                         </div> -->
-                                                        <div class="col-md-1">
+                                                        <div class="col-md-2">
                                                           <input type="text" class="form-control" readonly name="nro_producto" id="nro_producto" value="" >
                                                         </div>
-                                                        <label class="form-contro col-md-1">CÓDIGO</label>
+                                                        <!-- <label class="form-contro col-md-1">CÓDIGO</label> -->
                                                         <div class="col-md-3">                                                        
                                                             <input type="text" class="form-control" name="codigo_ant" id="codigo_ant" value="">
                                                         </div>
@@ -442,38 +444,38 @@
                                                 <div class="col-md-12">
                                                     <div class="form-group row">
                                                       <div class="col-md-2">
-                                                          <label class="col-form-label" for="precio_venta">Venta (<?=$g_moneda?>)</label>
-                                                          <input class="form-control" name="precio_venta" id="precio_venta" type="text" value="" placeholder="0.00" onkeypress="return justNumbers(event);">
-                                                      </div>
-                                                      <div class="col-md-2">
-                                                        <label class="col-form-label" for="precio_insumo">Costo (<?=$g_moneda?>)</label>
-                                                          <input class="form-control" name="precio_insumo" id="precio_insumo" type="text" value="" placeholder="0.00" onkeypress="return justNumbers(event);">
-                                                      </div>
-                                                      <div class="col-md-2">
-                                                        <label class="col-form-label" for="activo">Activo</label>
-                                                        <select class="form-control" name="activo" id="activo" >
-                                                            <option value="SI" selected>SI</option>
-                                                            <option value="NO">NO</option>
-                                                        </select>
-                                                      </div>
-                                                      <div class="col-md-3">
-                                                        <label class="col-form-label" for="unidades">Unidad</label>
-                                                        <select class="form-control" name="unidades" id="unidades">                                                          
-                                                        <?php foreach($lista_unidades as $i=>$lis): ?>
-                                                              <option value="<?=$lis->valor?>"><?=$lis->descripcion?></option>
-                                                        <?php endforeach;?>
+                                                            <label class="col-form-label" for="precio_venta">Venta (<?=$g_moneda?>)</label>
+                                                            <input class="form-control" name="precio_venta" id="precio_venta" type="text" value="" placeholder="0.00" onkeypress="return justNumbers(event);">
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                          <label class="col-form-label" for="precio_insumo">Costo (<?=$g_moneda?>)</label>
+                                                            <input class="form-control" name="precio_insumo" id="precio_insumo" type="text" value="" placeholder="0.00" onkeypress="return justNumbers(event);">
+                                                        </div>
+                                                        <div class="col-md-2">
+                                                          <label class="col-form-label" for="activo">Activo</label>
+                                                          <select class="form-control" name="activo" id="activo" >
+                                                              <option value="SI" selected>SI</option>
+                                                              <option value="NO">NO</option>
                                                           </select>
-                                                      </div>
-                                                      <div class="col-md-3 text-right">
-                                                          <input type="hidden" name="txtmodo" id="txtmodo" value="insertar" /></td>
-                                                          <button type="button" id="btnadd" name="btnadd" class="btn btn-primary">Grabar</button>
-                                                          <!--  -->
-                                                          <input type="hidden" name="txtid_producto_pv" id="txtid_producto_pv" value="" /></td>
-                                                          <button type="button" id="btnmod_pv" name="btnmod_pv" class="btn btn-primary">Grabar Precio</button>
-                                                          <!-- -->
-                                                          <!-- <button type="button" id="btnadddeta" name="btnadddeta" class="btn btn-info" data-toggle="modal" href="#myModal">Nuevo Insumo</button> -->
-                                                          <a href="<?=base_url().$module_id?>" id="hrefcancel" class="btn btn-default">Cancelar</a>
-                                                      </div>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                          <label class="col-form-label" for="unidades">Unidad</label>
+                                                          <select class="form-control" name="unidades" id="unidades">                                                          
+                                                          <?php foreach($lista_unidades as $i=>$lis): ?>
+                                                                <option value="<?=$lis->valor?>"><?=$lis->descripcion?></option>
+                                                          <?php endforeach;?>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-3 text-right">
+                                                            <input type="hidden" name="txtmodo" id="txtmodo" value="insertar" /></td>
+                                                            <button type="button" id="btnadd" name="btnadd" class="btn btn-primary">Grabar</button>
+                                                            <!--  -->
+                                                            <input type="hidden" name="txtid_producto_pv" id="txtid_producto_pv" value="" /></td>
+                                                            <button type="button" id="btnmod_pv" name="btnmod_pv" class="btn btn-primary">Grabar Precio</button>
+                                                            <!-- -->
+                                                            <!-- <button type="button" id="btnadddeta" name="btnadddeta" class="btn btn-info" data-toggle="modal" href="#myModal">Nuevo Insumo</button> -->
+                                                            <a href="<?=base_url().$module_id?>" id="hrefcancel" class="btn btn-default">Cancelar</a>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>

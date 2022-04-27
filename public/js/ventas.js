@@ -46,7 +46,9 @@ function tablaventas() {
     let nfactu = $("#v_nfactu").val()
     let desde = $("#v_desde").val()
     let hasta = $("#v_hasta").val()
-        // console.log('tdoc',tdoc,'sfactu',sfactu,'nfactu',nfactu)
+
+    let genNC = $("#hhdgenNC").val()
+    console.log('genNC', genNC)
     $.ajax({
         url: url_web + module_id + '/verVentas',
         type: 'POST',
@@ -70,14 +72,14 @@ function tablaventas() {
                 "columns": [{
                         "render": function(data, type, row) {
                             let htmlnc = ''
-                            let mytrash = `<button class="btn btn-danger btn-sm" onclick="anularVenta('${row.id_transac}');" value="${row.id_transac}"><span class="glyphicon glyphicon-trash"></span></button>`
-                            if (row.tdoc == '01' || row.tdoc == '03') {
+                                // let mytrash = '' // `<button class="btn btn-danger btn-sm" onclick="anularVenta('${row.id_transac}');" value="${row.id_transac}"><span class="glyphicon glyphicon-trash"></span></button>`
+                            if (genNC == 'Y' && (row.tdoc == '01' || row.tdoc == '03')) {
                                 htmlnc = `<button class="btn btn-primary btn-sm generarNC ${row.isNC?'disabled" disabled':'"'}  idtransac=${row.id_transac}><span class="glyphicon glyphicon-book"></span></button>`
-                                mytrash = ''
+
                             }
                             return `<div class="btn-group">
                 <button class="btn btn-default btn-sm edit" idtransac=${row.id_transac}><span class="glyphicon glyphicon-plus"></span></button>
-                ${mytrash}
+                
                 ${htmlnc} 
                 </div>`;
                         }
@@ -124,25 +126,32 @@ $('#datos_tabla_ventas tbody').on('click', 'button.edit', function() {
         data: { id_transac: id },
         success: function(rs) {
             // console.log('data',rs.bus_dato)   
+            $('#hdd_id_transac').val(id)
             $("#vd_num_doc").html(rs.bus_dato[0].num_doc)
             $("#vd_empleado").html(rs.bus_dato[0].empleado)
             $("#vd_mesa").html(rs.bus_dato[0].mesa)
-            $("#vd_tipo_pago").html(rs.bus_dato[0].tipo_pago)
+                // $("#vd_tipo_pago").html(rs.bus_dato[0].tipo_pago)
             $("#vd_cliente").html(rs.bus_dato[0].tp_ruc + ' | ' + rs.bus_dato[0].n_ruc + ' | ' + rs.bus_dato[0].n_rs)
+
+
+            let pagos = '';
+            rs.lista_mp.map(function(dt) {
+                pagos += `<tr><td>${dt.tipo_pago}</td><td>&nbsp;&nbsp;&nbsp;S/ ${dt.monto}</td></tr>`
+            })
+            $("#vd_tipo_pago").html(pagos)
 
             $('#rowdet tr').remove()
             $('#impprod tr').remove()
-
             rs.lista_deta.map(function(dt) {
                 // console.log(dt)
                 $('#rowdet').append(
                     `<tr>
-          <td>${dt.categoria}</td>
-          <td>${dt.producto}</td>
-          <td>${dt.cantidad}</td>             
-          <td>${dt.venta}</td>             
-          <td>${dt.total}</td>             
-      </tr>`
+                        <td>${dt.categoria}</td>
+                        <td>${dt.producto}</td>
+                        <td>${dt.cantidad}</td>             
+                        <td>${dt.venta}</td>             
+                        <td>${dt.total}</td>             
+                    </tr>`
                 )
             })
             $('#impprod').append(
@@ -184,6 +193,19 @@ $('#datos_tabla_ventas tbody').on('click', 'button.edit', function() {
 
             $('#myModalNC').modal('show');
         },
+        error: function(jqXHR, textStatus, error) {
+            console.log(jqXHR.responseText);
+            swal("Advertencia!", 'Error en Traer Datos', "warning");
+        }
+    });
+})
+
+
+$('#btn_reimpresion').click(() => {
+    let id_transac = $('#hdd_id_transac').val()
+    $.ajax({
+        url: url_web + 'Tpv/generarFacBolElectronica/' + id_transac,
+
         error: function(jqXHR, textStatus, error) {
             console.log(jqXHR.responseText);
             swal("Advertencia!", 'Error en Traer Datos', "warning");

@@ -17,7 +17,7 @@
 			}		
 			if($lis->accion == 'ventas') {
 				$ventas = true;
-			}
+			} 
       if($lis->accion == 'edit') {
 				$edit = true;
 			}
@@ -304,7 +304,7 @@
                       </div>
                   </div>
                   <div class="col-xs-6"><br />
-                      <table cellspacing="0">
+                      <!-- <table cellspacing="0">
                           <tbody>
                           <tr>
                               <td><input type="button" value="1" class="gris_num" id="tecla_p1" onclick="enviar_variables_pago(this.value);"></td>
@@ -325,27 +325,47 @@
                               <td><input type="button" value="0" class="gris_num" id="tecla_p0" onclick="enviar_variables_pago(this.value);"></td>
                           </tr>
                         </tbody>
-                      </table>
+                      </table> -->
                   </div>
             </div>
               <p></p>
               <div class="row">
-                  <div class="panel panel-default custom"><span class="glyphicon glyphicon-briefcase"></span> FORMA DE PAGO</div>
-                      <div class="col-xs-12" >
-                          <div class="row">
-                              <div class="col-xs-4"><bottom class="btn btn-default btn-block active cltipopago" name="btnefectivo" id="<?=$lis_tpagos[0]->id_tp?>"><i class="fa fa-money" aria-hidden="true" style="font-size: 40px ;"></i></bottom></div>
-                              <div class="col-xs-4"><bottom class="btn btn-default btn-block active cltipopago" name="btnvisa" id="<?=$lis_tpagos[1]->id_tp?>"><i class="fa fa-cc-visa fa-lg" aria-hidden="true" style="font-size: 50px;"></i></bottom></div>
-                              <div class="col-xs-4"><bottom class="btn btn-default btn-block cltipopago" name="btnmastercard" id="<?=$lis_tpagos[2]->id_tp?>"><i class="fa fa-cc-mastercard fa-lg" aria-hidden="true" style="font-size: 50px;"></i></bottom></div>
-                          </div>
-                          <div class="row" style="margin-top: 10px;">
-                              <div class="col-xs-3"><bottom class="btn btn-default btn-block cltipopago" name="btndinersclub" id="<?=$lis_tpagos[3]->id_tp?>"><i class="fa fa-cc-diners-club" style="font-size: 40px;"></i></bottom></div>
-                              <div class="col-xs-3"><bottom class="btn btn-default btn-block cltipopago" name="btnamex" id="<?=$lis_tpagos[4]->id_tp?>"><i class="fa fa-cc-amex" aria-hidden="true" style="font-size: 40px;"></i></bottom></div>
-                              <!-- <div class="col-xs-4"><bottom class="btn btn-default btn-block cltipopago" name="btnefectivo_tarjeta" id="<?=$lis_tpagos[5]->id_tp?>"><i class="fa fa-money" aria-hidden="true" style="font-size: 50px;"></i></bottom></div> -->
-                              <div class="col-xs-3"><bottom class="btn btn-default btn-block cltipopago" name="btnyape" id="<?=$lis_tpagos[6]->id_tp?>"><img src="<?php echo base_url();?>public/images/yape.png" alt="Yape" width="60" height="50"></bottom></div>
-                              <div class="col-xs-3"><bottom class="btn btn-default btn-block cltipopago" name="btnyape" id="<?=$lis_tpagos[7]->id_tp?>"><img src="<?php echo base_url();?>public/images/transferencia.png" alt="transferencia" width="60" height="50"></bottom></div>
-                              <input type="hidden" name="hdtipo_pago" id="hdtipo_pago" value="<?=$lis_tpagos[0]->id_tp?>">
-                          </div>
+                  <div class="panel panel-default custom"><span class="glyphicon glyphicon-briefcase"></span> FORMA DE PAGO
+                  </div>
+                  <div class="row">
+                    <form action="#" type="POST" name="frmtmpMP" id="frmtmpMP">
+                      <div class="col-xs-3">
+                        <select class="form-control" id="cbo_tpmpago" name="cbo_tpmpago" required>
+                        <option value="1">Efectivo</option>
+                        <option value="2">Visa</option>
+                        <option value="3">MasterCard</option>
+                        <option value="4">Diners Club</option>
+                        <option value="5">American Express</option>
+                        <option value="7">Yape</option>
+                        <option value="8">Transferencia</option>
+                        </select>
                       </div>
+                      <div class="col-xs-3">
+                        <input class="form-control" required type="text" name="txt_monto_pago" id="txt_monto_pago" onkeypress="return filterFloat(event,this);" >
+                      </div>
+                      <div class="col-xs-2">
+                        <input class="form-control btn btn-success" type="submit" value="Añadir" >
+                      </div>
+                    </form>                                            
+                  </div>
+                  <div class="panel panel-default col-xs-10">
+                    <table id="tbl_mediopago" class="table scroll table-bordered table-striped dt-responsive text-center">
+                        <thead>
+                            <tr>
+                                <th width="55%">Tipo Pago</th>
+                                <th width="30%">Monto</th>
+                                <th width="15%">Accion</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody_mediopago">
+                        </tbody>
+                    </table>
+                  </div>                    
               </div>
               <p></p>
               <div class="row" id="sty_fpag">
@@ -367,13 +387,13 @@
                         </div>
                         <div class="col-xs-1" style="margin-top: 1.8em">
                           <button type="button" id="buscarClienteSumat" name="buscarClienteSumat" class="btn btn-info" >SUNAT</button>
-                        </div>
-                        <div class="col-xs-1" style="margin-top: 1.8em">
-                          <button type="button" id="btncrearCliente" name="btncrearCliente" class="btn btn-default" disabled>Guardar</button>
-                        </div>
+                        </div>                        
                         <div class="col-xs-6">
                           <label for="razon_social" class="text-right">Razon Social /Apellidos y Nombres (*)</label>
                           <input class="form-control" style="text-transform: uppercase;" name="razon_social" id="razon_social" type="text" value="" placeholder="Apellidos y Nombres">
+                        </div>
+                        <div class="col-xs-1" style="margin-top: 1.8em">
+                          <button type="button" id="btncrearCliente" name="btncrearCliente" class="btn btn-default" disabled>Guardar</button>
                         </div>                        
                         <div class="col-xs-6">
                           <input name="email" id="email" type="hidden" value="" placeholder="cliente@dominio.com">
@@ -382,16 +402,6 @@
                     </div>
 
                     <div class="col-xs-12 checkbox">
-                        <!-- <label class="">
-                          <div class="radio">
-                              <label style="font-size: 1.5em">
-                                  <input type="radio" id="rb<?=$lista_documentos[6]->id_serie?>" name="rbdoc_pago" value="<?=$lista_documentos[6]->id_serie?>" >
-                                  <span class="cr" style="background-color: #286090;" onclick="clientevacio()"><i class="cr-icon fa fa-circle"></i></span>
-                                  <?=$lista_documentos[6]->descripcion?>
-                              </label>
-                          </div>
-                        </label> -->
-
                         <label class="">
                           <div class="radio">
                               <label style="font-size: 1.5em">
@@ -401,7 +411,6 @@
                               </label>
                           </div>
                         </label>
-
                         <label class="">
                           <div class="radio">
                               <label style="font-size: 1.5em">
@@ -540,15 +549,20 @@
         </div>
         <div class="modal-body">
           <div class="form-group row">
-            <label for="newMP" class="col-sm-4 col-form-label">Ingrese la Nueva MP</label>
-            <div class="col-sm-7">
+            <div class="col-sm-4">
+              <label for="newMP" class="col-form-label">Seleccione el Medio de Pago correcto</label>
               <input type="hidden" id="mp_id_transac">
-              <select id="mp_id_tp" name="mp_id_tp" class="form-control">
+              <input type="hidden" id="mp_id_transac_mp">
+              <select id="mp_id_tp_mp" name="mp_id_tp_mp" class="form-control">
                   <?php  
                   foreach($lis_tpagos as $lis){
                     echo '<option value="'.$lis->id_tp.'">'.$lis->tipo_pago.'</option>';
                   } ?>                
-                </select>
+              </select>
+            </div>
+            <div class="col-sm-8">
+              <label for="newMP_coment" class="col-form-label">Motivo del Cambio</label>
+              <textarea type="txt" id="newMP_coment" class="form-control" rows="3"></textarea>
             </div>
           </div>    
         </div>
@@ -560,4 +574,5 @@
     </div>
   </div>
 </div>
+
 <?php $this->load->view("punto_venta/footer"); ?>

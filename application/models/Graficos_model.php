@@ -51,7 +51,8 @@ class Graficos_model extends CI_Model {
 
 	public function graficarCostoVentaXMesesAnio()
 	{
-        $sql = "EXEC SP_COSTOS_VENTAS_MENSUAL";
+        // $sql = "EXEC SP_COSTOS_VENTAS_MENSUAL";
+        $sql = "CALL SP_COSTOS_VENTAS_MENSUAL";
         $query = $this->db->query($sql);
 		return $query->result();
 	}

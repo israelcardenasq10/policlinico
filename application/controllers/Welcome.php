@@ -6,10 +6,10 @@
 	$txt = '$db["default"] = array(
 		"dsn"	=> "",
 		"hostname" => "localhost",
-		"username" => "sa",
+		"username" => "pventa",
 		"password" => "1q2w3e4r.",
-		"database" => "bd_charlee",
-		"dbdriver" => "sqlsrv",
+		"database" => "pventa",
+		"dbdriver" => "mysqli",
 		"dbprefix" => "",
 		"pconnect" => FALSE,
 		"db_debug" => (ENVIRONMENT !== "production"),

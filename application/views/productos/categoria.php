@@ -10,7 +10,6 @@
               </div>      
               <div class="col-md-12" id="form">                       
                   <div class="form-group">
-                      <div class="col-md-1"></div>
                       <div class="col-md-2">
                         <input type="text" class="form-control" name="id_categoria" id="id_categoria" value="" maxlength="6" placeholder="Codigo" required>
                       </div>                  
@@ -22,6 +21,9 @@
                               <option value="1"> Activo </option>
                               <option value="0"> Inactivo </option>      
                           </select>
+                      </div>
+                      <div class="col-md-1">
+                        <input type="text" class="form-control" name="prefijo" id="prefijo"  placeholder="EN" required>
                       </div>
                       <div class="col-md-1">
                           <input type="hidden" name="hdpagina" id="hdpagina" value="<?=$p_modulo?>">
@@ -46,6 +48,7 @@
                   <th width="12%">ACCION</th>
                   <th>CODIGO</th>
                   <th>NOMBRE</th>
+                  <th>PREFIJO</th>
                   <th>ESTADO</th>
                 </tr>
               </thead>
@@ -58,6 +61,7 @@
                           </td>
                           <td><?=$lis->id_categoria?></td>
                           <td><?=$lis->nombre?></td>   
+                          <td><?=$lis->prefijo?></td> 
                           <td><?=$lis->estado?></td> 
                         </tr>
                 <?php endforeach;?>                                      

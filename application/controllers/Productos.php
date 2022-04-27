@@ -60,11 +60,13 @@ class Productos extends Secure_area {
 					'nro_producto' => $this->input->post('nro_producto'),
 					'nombre' => strtoupper($this->input->post('nombre')),
 					'precio_venta' => $this->input->post('precio_venta'),
+					'precio_insumo' => $this->input->post('precio_insumo'),
 					'id_owner' => $this->session->userdata('person_id'),
 					'persona_id_created' => $this->session->userdata('person_id'),
 					'date_created'=>$fecha_registro,
 					'activo' => $this->input->post('activo'),
 					'unidades' => $this->input->post('unidades'),
+					'codigo_ant'=>$this->input->post('codigo_ant'),
 				);
 		$num = $this->productos_model->insertar($data);
 		echo $num;
@@ -154,6 +156,7 @@ class Productos extends Secure_area {
 						'precio_insumo' => $this->input->post('precio_insumo'),
 						'activo' => $this->input->post('activo'),
 						'unidades' => $this->input->post('unidades'),
+						'codigo_ant'=>$this->input->post('codigo_ant'),
 					);
 		}
 		else // Actualiza por MODIFICAR
@@ -164,6 +167,7 @@ class Productos extends Secure_area {
 						'precio_insumo' => $this->input->post('precio_insumo'),
 						'activo' => $this->input->post('activo'),
 						'unidades' => $this->input->post('unidades'),
+						'codigo_ant'=>$this->input->post('codigo_ant'),
 					);
 		}
 		$this->productos_model->actualizar($this->input->post('id_producto'), $data);
@@ -288,6 +292,7 @@ class Productos extends Secure_area {
 		$data = array(
 					'id_categoria' => $this->input->post('id_categoria'),
 					'nombre' => strtoupper($this->input->post('nombre')),
+					'prefijo' => $this->input->post('prefijo'),
 		      		'estado' => $this->input->post('estado')
 				);
 
@@ -311,7 +316,8 @@ class Productos extends Secure_area {
 		$data = array(
 					'id_categoria' => $this->input->post('id_categoria'),
 					'nombre' => strtoupper($this->input->post('nombre')),
-					'estado' => $this->input->post('estado')
+					'prefijo' => $this->input->post('prefijo'),
+					'estado' => $this->input->post('estado'),
 				);
 
     	$this->productoscate_model->actualizar($this->input->post('id_categoria'),$data);

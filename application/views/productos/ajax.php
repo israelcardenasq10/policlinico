@@ -59,6 +59,7 @@
                       <th width="12%">ACCION</th>
                       <th>CODIGO</th>
                       <th>NOMBRE</th>
+                      <th>PREFIJO</th>
                       <th>ESTADO</th>
                     </tr>
                   </thead>
@@ -71,6 +72,7 @@
                               </td>
                               <td><?=$lis->id_categoria?></td>
                               <td><?=$lis->nombre?></td>   
+                              <td><?=$lis->prefijo?></td> 
                               <td><?=$lis->estado?></td> 
                             </tr>
                     <?php endforeach;?>                                      

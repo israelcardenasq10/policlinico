@@ -1,9 +1,5 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
-/*
-* Excel library for Code Igniter applications
-* Author: Derek Allard
-*/
- 
+
 function to_excel($sql, $filename='exceloutput')
 {
      $headers = ''; // just creating the var for field headers to append to below

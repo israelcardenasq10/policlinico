@@ -1,6 +1,6 @@
 $(document).ready(function() {
-    let fecha = moment().format("YYYYMMDDHHmmss");
-    console.log('fecha', fecha)
+    // let fecha = moment().format("YYYYMMDDHHmmss");
+    // console.log('fecha', fecha)
 
     $('#btnmod_pv').hide();
     $('#btnadddeta').hide();
@@ -334,7 +334,10 @@ function verNroProducto(id_categoria) {
         data: { id_categoria: id_categoria },
         dataType: 'json',
         success: function(data) {
+            let pref = $("#id_categoria option:selected").text().substring(0, 2)
+                // console.log('pref', pref)
             $("#nro_producto").val(data[0].nro_producto);
+            $("#codigo_ant").val(pref + data[0].nro_producto);
         }
     });
 }

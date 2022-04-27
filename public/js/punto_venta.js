@@ -503,8 +503,7 @@ $(document).ready(function() {
             });
         }
     });
-    // --
-
+    // --    
     $(".cltipopago").on("click", this.id, function() {
         $(".cltipopago").removeClass('btn-primary active').removeClass('btn-default');
         $(".cltipopago").addClass('btn-default');
@@ -523,26 +522,11 @@ $(document).ready(function() {
 
     });
 
-    // Pago Diferido
-    $(".cltipopago_pdif").on("click", this.id, function() {
-        $(".cltipopago_pdif").removeClass('btn-primary active').removeClass('btn-default');
-        $(".cltipopago_pdif").addClass('btn-default');
-
-        var pdif_id = this.id;
-        $('#' + pdif_id).addClass('btn-primary active');
-        $('#hdtipo_pago_dif').val(pdif_id.substr(-1));
-
-        //var pago_dif = Math.abs($( '#txtvuelto_cliente' ).val());
-        //$( '#txtvuelto_cliente' ).val(pago_dif.toFixed(2));
-    });
-    // --
 
     $("#btngenerarVentaPrint").on("click", function() {
 
         var id_tmp_cab = $('#hdid_tmp_cab').val();
         var doc_pago = $('input:radio[name=rbdoc_pago]:checked').val();
-        var tipo_pago = $('#hdtipo_pago').val();
-        var tipo_pago_dif = $('#hdtipo_pago_dif').val() > 0 ? $('#hdtipo_pago_dif').val() : 0; // if tenario
 
         var total_venta = $('#txttotal_venta').val();
         var pago_cliente = $('#txtpago_cliente').val();
@@ -553,14 +537,26 @@ $(document).ready(function() {
         let nruc = $('#nro_doc').val().trim();
         let rsoc = $('#razon_social').val();
 
+        let mpago = []
+        $("#tbody_mediopago").find("tr.skuval").each(function() {
+            let montox = $(this).attr('monto');
+            if ($(this).attr('mpagotext') == "Efectivo") {
+                montox = parseFloat(montox) - parseFloat(vuelto_cliente)
+            }
+            mpago.push({
+                id_tp: $(this).attr('mpago'),
+                tipo_pago: $(this).attr('mpagotext'),
+                monto: montox
+            })
+        });
+
+        console.log('tipo_pago', tipo_pago)
+        console.log('doc_pago', doc_pago)
         if (pago_cliente == "0.00") {
             swal("Punto de Venta", "Debe ingresar el pago del Cliente!", "warning");
             return false;
         } else if (parseFloat(pago_cliente) < parseFloat(total_venta) && tipo_pago != 6) {
             swal("Punto de Venta", "El pago del Cliente no puede ser menor al Total!", "warning");
-            return false;
-        } else if (tipo_pago_dif == '0' && tipo_pago == 6) {
-            swal("Punto de Venta", "Debe seleccionar una Tarjeta de Pago!", "warning");
             return false;
         } else if (id_cliente == '' || nruc == '' || rsoc == '') {
             swal("Punto de Venta", "Ingrese los Datos del Cliente!", "warning");
@@ -568,15 +564,11 @@ $(document).ready(function() {
         } else if (doc_pago == 1 && (tipo_doc != 'RUC' || nruc.length != 11)) { //factura
             swal("Punto de Venta", "Para generar la Factura debe Ingresar un documeno tipo RUC!", "warning");
             return false;
-        }
-        /*else if (doc_pago == 2 && (tipo_doc != 'DNI' || nruc.length != 8)) { //boleta
-                   swal("Punto de Venta", "Solo puede Generar una Boleta con DNI VALIDO", "warning");
-                   return false;
-               } */
-        else if (parseFloat(vuelto_cliente) > 0 && tipo_pago != 1) { //boleta
-            swal("Punto de Venta", "No se puede Tener Vuelto en medio de pago que no sea efectivo", "warning");
+        } else if (tipo_pago != 1 && doc_pago == 3) {
+            swal("Punto de Venta", "NO PUEDE GENERAR UN RECIBO CUANDO EL MEDIO DE PAGO NO ES SOLO EFECTIVO!", "warning");
             return false;
         } else {
+            var tipo_pago = mpago.length > 1 ? 6 : mpago[0]['id_tp'];
             $(this).attr('disabled', true);
             // Desactiva por completo el boton para que no se pueda dar mas de un click!
             $(this).css({ 'pointer-events': 'none' });
@@ -590,7 +582,6 @@ $(document).ready(function() {
                     id_tmp_cab: id_tmp_cab,
                     doc_pago: doc_pago,
                     tipo_pago: tipo_pago,
-                    tipo_pago_dif: tipo_pago_dif,
                     total_venta: total_venta,
                     pago_cliente: pago_cliente,
                     vuelto_cliente: vuelto_cliente,
@@ -598,6 +589,7 @@ $(document).ready(function() {
                     nruc: nruc,
                     rsoc: rsoc,
                     tipo_doc: tipo_doc,
+                    mpago: mpago
                 },
                 success: function(result) {
                     // console.log('result', result)
@@ -761,7 +753,7 @@ $(document).ready(function() {
                         // { "data": "tipo_pago" },
                         {
                             "render": function(data, type, row) {
-                                let valor = `<button class="btn btn-default btn-sm" type="button" onclick="changeMP(${row.id_transac} , ${row.id_tp});"> ${row.tipo_pago} </button>`
+                                let valor = `<button class="btn btn-default btn-sm" type="button" onclick="changeMP(${row.id_transac},${row.id_tp},${row.id_transac_mp} );"> ${row.tipo_pago} </button>`
                                 return (camb_mp == '' || row.id_cierre !== null || row.anulado == "SI") ? row.tipo_pago : valor;
                             }
                         }, {
@@ -772,7 +764,7 @@ $(document).ready(function() {
                         },
                         // { "data": "subtotal_venta" },
                         // { "data": "igv" },
-                        { "data": "total_venta" }
+                        { "data": "monto" }
 
                     ],
                     "rowCallback": function(row, data, index) {
@@ -1677,28 +1669,41 @@ $('#myformCambioCantidad').submit(function(e) {
     //identificarMesaReservada(id_emple, id_mesa)
 })
 
-function changeMP(id, tp) {
+function changeMP(id, tp, tpme) {
     console.log('tp', tp)
     $('#mp_id_transac').val(id)
     $('#mp_id_tp').val(tp)
+    $('#mp_id_transac_mp').val(tpme)
     $('#myModalMP').modal('show')
 }
 
 $('#btn_changemp').click(function() {
     $('#btn_changemp').prop('disabled', true);
     let id_transac = $('#mp_id_transac').val()
-    let id_tp = $('#mp_id_tp').val()
+    let id_tp = $('#mp_id_tp_mp').val()
+    let id_tptext = $('#mp_id_tp_mp  option:selected').text()
+    let glosa = $('#newMP_coment').val()
+    let id_tran_mp = $('#mp_id_transac_mp').val()
+    if (glosa == '' || id_tran_mp == '') {
+        $('#btn_changemp').prop('disabled', false);
+        return
+    }
     $.ajax({
         url: url_web + module_id + '/changeMP',
         type: "POST",
-        data: { id_transac: id_transac, id_tp: id_tp },
+        data: {
+            id_transac: id_transac,
+            id_tp: id_tp,
+            id_tptext: id_tptext,
+            glosa: glosa,
+            id_transac_mp: id_tran_mp
+        },
         success: function(data) {
             console.log('data', data)
             $('#myModalMP').modal('hide')
             $('#btn_changemp').prop('disabled', false);
             $('#btn_mostrar_ventas').click()
             swal("Punto de Venta", "Se Actualizó el Medio de Pago", "warning")
-
         }
     })
 })
@@ -1803,4 +1808,187 @@ const buscarComprobante = () => {
             type: "GET",
         })
     }, 10000);
+}
+
+$('#boton_prueba').click(() => {
+    console.log('click')
+    let mpago = []
+    $("#tbody_mediopago").find("tr.skuval").each(function() {
+        mpago.push({
+            id_tp: $(this).attr('mpago'),
+            tipo_pago: $(this).attr('mpagotext'),
+            monto: $(this).attr('monto'),
+        })
+    });
+
+    $.ajax({
+        url: url_web + module_id + '/pruebajson',
+        type: "POST",
+        data: { mpago: mpago, otro: 2131 },
+        success: function(data) {
+            console.log('datafdsfsdf', data)
+
+        }
+    })
+})
+
+$('#tbl_mediopago tbody').on('click', 'button.deletemp', function() {
+    $(this).closest('tr').remove();
+    let monto_acum = 0
+    let efectivo = 0
+    let montomaxPago = parseFloat($('#txttotal_venta').val())
+
+    $("#tbody_mediopago").find("tr.skuval").each(function() {
+        if ($(this).attr('mpago') == 1) {
+            efectivo = parseFloat($(this).attr('monto'))
+        } else {
+            monto_acum += parseFloat($(this).attr('monto'))
+        }
+    });
+
+    let tot_pago_cliente = monto_acum + efectivo
+    let vuelto = tot_pago_cliente - montomaxPago
+
+    $('#txtvuelto_cliente').val(vuelto.toFixed(2))
+    $('#txtpago_cliente').val(tot_pago_cliente.toFixed(2))
+})
+
+$('#frmtmpMP').submit((ev) => {
+    ev.preventDefault()
+    let montomaxPago = parseFloat($('#txttotal_venta').val())
+    let monto_acum = efectivo = 0
+    let val = false
+
+    let mpago = $('#cbo_tpmpago').val()
+    let mpagotext = $('#cbo_tpmpago  option:selected').text()
+    let monto = parseFloat($('#txt_monto_pago').val()).toFixed(2)
+
+    if (monto <= 0) {
+        swal({ title: "El monto tiene q ser mayor a cero", type: "error" })
+        return
+    }
+    $("#tbody_mediopago").find("tr.skuval").each(function() {
+        if ($(this).attr('mpago') == mpago) {
+            val = true
+        }
+        if ($(this).attr('mpagotext') == "Efectivo") {
+            efectivo = parseFloat($(this).attr('monto'))
+        } else {
+            monto_acum += parseFloat($(this).attr('monto'))
+        }
+    });
+
+    if (val) {
+        swal({ title: "No se puede adicionar el mismo medio de pago", type: "error" })
+    } else {
+        if (mpagotext == "Efectivo") {
+            efectivo = parseFloat(monto)
+        } else {
+            monto_acum = monto_acum + parseFloat(monto)
+        }
+
+        if (montomaxPago >= monto_acum) {
+            let tot_pago_cliente = monto_acum + efectivo
+            let vuelto = tot_pago_cliente - montomaxPago
+            $("#tbody_mediopago").append(`
+            <tr class="skuval" mpago=${mpago} mpagotext=${mpagotext} monto=${monto} ><td>${mpagotext}</td><td>S/ ${monto}</td><td><button type="button" class="btn btn-danger deletemp"><i class="fa fa-trash"></i></button></td></tr>
+            `);
+            $('#txt_monto_pago').val('')
+            $('#txtvuelto_cliente').val(vuelto.toFixed(2))
+            $('#txtpago_cliente').val(tot_pago_cliente.toFixed(2))
+        } else {
+            swal({
+                title: "NO puede exceder el monto de " + montomaxPago,
+                type: "error"
+            })
+        }
+    }
+})
+
+function enviar_variables_pago(valor) {
+    $('.gris_num').css({ 'background-color': '#828282' });
+
+    if (valor === 'C') {
+        var pago_cliente = 0;
+        $('#txtpago_cliente').val(pago_cliente.toFixed(2));
+        var vuelto_cliente = 0;
+        $('#txtvuelto_cliente').val(vuelto_cliente.toFixed(2));
+    } else {
+        if ($('#txtpago_cliente').val() == 0)
+            $('#txtpago_cliente').val('')
+
+        if (valor === '.') {
+            $('#tecla_punto').css({ 'background-color': '#449d44' });
+
+            var arr_pago = $('#txtpago_cliente').val().split(".");
+            if (arr_pago[1] == '00')
+                var pago = (arr_pago[0] + valor);
+            else
+                var pago = ($('#txtpago_cliente').val() + valor);
+        } else {
+            $('#tecla_p' + valor).css({ 'background-color': '#449d44' });
+
+            var arr_pago = $('#txtpago_cliente').val().split(".");
+            if (arr_pago[1] == '00') {
+                var pago_tmp = (arr_pago[0] + valor);
+                var pago = pago_tmp + '.00';
+            } else {
+                if (parseInt(arr_pago[1]) > 0) {
+                    var pago_tmp = ($('#txtpago_cliente').val() + valor);
+                    var pago = pago_tmp;
+                } else if (arr_pago[1] !== '') {
+                    var pago_tmp = ($('#txtpago_cliente').val() + valor);
+                    var pago = pago_tmp + '.00';
+                } else {
+                    var pago_tmp = ($('#txtpago_cliente').val() + valor);
+                    var pago = pago_tmp;
+                }
+            }
+
+        }
+
+        $('#txtpago_cliente').val(pago);
+
+        var pago_cliente = $('#txtpago_cliente').val();
+        var total_venta = $('#txttotal_venta').val();
+        var vuelto_cliente = ((parseFloat(pago_cliente) - parseFloat(total_venta)));
+        // var vuelto_cliente = Math.abs((parseFloat(pago_cliente) - parseFloat(total_venta)));
+
+        $('#txtvuelto_cliente').val(vuelto_cliente.toFixed(2));
+    }
+}
+
+function filterFloat(evt, input) {
+    var key = window.Event ? evt.which : evt.keyCode;
+    var chark = String.fromCharCode(key);
+    var tempValue = input.value + chark;
+    if (key >= 48 && key <= 57) {
+        if (filter(tempValue) === false) {
+            return false;
+        } else {
+            return true;
+        }
+    } else {
+        if (key == 8 || key == 13 || key == 0) {
+            return true;
+        } else if (key == 46) {
+            if (filter(tempValue) === false) {
+                return false;
+            } else {
+                return true;
+            }
+        } else {
+            return false;
+        }
+    }
+}
+
+function filter(__val__) {
+    var preg = /^([0-9]+\.?[0-9]{0,2})$/;
+    if (preg.test(__val__) === true) {
+        return true;
+    } else {
+        return false;
+    }
+
 }

@@ -169,10 +169,11 @@ class Tpv_model extends CI_Model {
 
 	public function verCantProdSelectTMP($id_producto)
 	{
+		$hoy=mdate("%Y-%m-%d", time());
 		$this->db->select(" SUM(tpv.cantidad) as cant_prod_ins ");
 		$this->db->from('tb_tmp_cab_pventa tcpv');
 		$this->db->join('tb_tmp_pventa tpv', 'tcpv.id_tmp_cab = tpv.id_tmp_cab');
-		$this->db->where('tcpv.fecha = CAST(getdate() as date)');
+		$this->db->where('tcpv.fecha ',$hoy);
 		$this->db->where('tcpv.estado', 'P');
 		$this->db->where('tpv.id_producto', $id_producto);
 		$query = $this->db->get();
@@ -272,18 +273,37 @@ class Tpv_model extends CI_Model {
 
 	public function eliminarProdTMPTpv($id, $id2,$empleado)
 	{
-		$this->db->query("UPDATE tb_tmp_pventa SET isDelete=1 ,persona_id_updated =$empleado ,date_updated=getdate() where id_tmp_cab=".$id." and correlativo=".$id2.";");
+		$data = array(
+			"isDelete"=>1,
+			"persona_id_updated" =>$empleado,
+			"date_updated"=> mdate("%Y-%m-%dT%H:%i:%s")
+		)	;
+		$this->db->where("id_tmp_cab", $id);
+		$this->db->where("correlativo", $id2);
+		$this->db->update("tb_tmp_pventa", $data);
 	}
 
 	public function eliminarTMPTpvCab($id)
 	{
-		$this->db->query("UPDATE tb_tmp_cab_pventa SET isDelete=1, estado='C' where id_tmp_cab=".$id.";");
+		$data = array(
+			"isDelete"=>1,
+			"estado"=>"C"
+		);
+		$this->db->where("id_tmp_cab", $id);
+		$this->db->update("tb_tmp_cab_pventa", $data);
+	
 	}
 
 	public function eliminarTMPTpv($id)
 	{
 		// $this->db->delete('tb_tmp_pventa', array('id_tmp_cab' => $id));
-		$this->db->query("UPDATE tb_tmp_pventa SET isDelete=1 where transac_venta = 0 AND  id_tmp_cab=".$id.";");
+		
+		$data = array(
+			"isDelete"=>1
+		);
+		$this->db->where("transac_venta", 0);
+		$this->db->where("id_tmp_cab", $id);
+		$this->db->update("tb_tmp_pventa", $data);
 	}
 
 	public function insertarLogUsuarios($data)
@@ -294,12 +314,12 @@ class Tpv_model extends CI_Model {
 	// GRABAR TRANSACCIÓN DE VENTA	
 	public function generarCodMax($sfactu) //tipo_doc
 	{		
-		$this->db->select("ISNULL(MAX(nfactu),'00000000') AS num_doc ");
+		$this->db->select_max("nfactu");
 		$this->db->where('sfactu', $sfactu);
 		$query = $this->db->get('tb_transac_pventa');
 		$lis = $query->result();
 		// var_dump($lis[0]->num_doc);
-		return $lis[0]->num_doc;
+		return $lis[0]->nfactu;
 
 	}
 
@@ -314,6 +334,10 @@ class Tpv_model extends CI_Model {
 		$this->db->insert('tb_transac_pventa_detalle', $data);
 	}
 
+	public function insertarTransacVentaMedioPago($data)
+	{
+		$this->db->insert('tb_transac_pventa_mpago', $data);
+	}
 	public function actualizarTMPTpvCab($data, $id)
 	{
 		$this->db->where("id_tmp_cab", $id);
@@ -509,10 +533,14 @@ class Tpv_model extends CI_Model {
 		$this->db->update('tb_transac_pventa', $data);
 
 	}
-
+	public function updatetransacmpago($where,$data)
+	{
+		$this->db->where($where);
+		$this->db->update("tb_transac_pventa_mpago", $data);	
+	}
 	public function limpMesas()
 	{
-		$this->db->query("EXEC usp_ic_act_vts_dia ");
+		$this->db->query("CALL usp_ic_act_vts_dia ");
 	}
 
 	public function disponibleMesa($id_mesa)

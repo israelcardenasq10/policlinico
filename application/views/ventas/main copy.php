@@ -251,7 +251,7 @@
       						          <tr>
       						            <th style="width: 10%;"></th>
           									  <th># VENTA</th>
-          									  <th>BARISTA</th>
+          									  <th>USUARIO</th>
           									  <th>CLIENTE</th>
           									  <th>MESA</th>
           									  <th>TP</th>

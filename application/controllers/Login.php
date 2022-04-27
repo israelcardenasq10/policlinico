@@ -103,7 +103,7 @@ class Login extends CI_Controller {
 					}
 					else // BARISTA - CAJA - SUPERVISOR
 					{
-						redirect('tpv');
+						redirect('ventas');
 					}
 					break;
 				endswitch;
