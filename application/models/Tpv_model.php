@@ -56,7 +56,7 @@ class Tpv_model extends CI_Model {
 		$this->db->select("b.*");
 		$this->db->from('tb_empleados a');
 		$this->db->join('tb_datos b', 'a.person_id = b.person_id');
-		$this->db->where('a.id', $id_emple);
+		$this->db->where('b.person_id', $id_emple);
         $query = $this->db->get();
 		return $query->result();
 	}
@@ -375,8 +375,7 @@ class Tpv_model extends CI_Model {
 	{
 		$this->db->select("d.first_name");
 		$this->db->from('tb_datos d');
-		$this->db->join('tb_empleados e', 'd.person_id = e.person_id');
-		$this->db->join('tb_tmp_cab_pventa cv', 'e.id = cv.id_emple');
+		$this->db->join('tb_tmp_cab_pventa cv', 'd.person_id = cv.id_emple');
 		$this->db->where('cv.id_tmp_cab', $id_tmp_cab);
         $query = $this->db->get();
 		return $query->result();

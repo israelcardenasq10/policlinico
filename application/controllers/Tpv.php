@@ -2377,7 +2377,7 @@ class Tpv extends Secure_area {
 		
 		$transac = $this->tpv_model->listarTransacVentaCAB($id_transac );
 		$asunto = "COMPROBANTE ANULADO POLICLINICO ".$transac[0]->num_doc;
-		$this->sendemail($asunto , $motivo);	
+		// $this->sendemail($asunto , $motivo);	
 
 	}
 

@@ -549,9 +549,11 @@ $(document).ready(function() {
                 monto: montox
             })
         });
+        var tipo_pago = 1;
+        if (mpago.length > 0) {
+            tipo_pago = mpago.length > 1 ? 6 : mpago[0]['id_tp'];
+        }
 
-        console.log('tipo_pago', tipo_pago)
-        console.log('doc_pago', doc_pago)
         if (pago_cliente == "0.00") {
             swal("Punto de Venta", "Debe ingresar el pago del Cliente!", "warning");
             return false;
@@ -568,7 +570,7 @@ $(document).ready(function() {
             swal("Punto de Venta", "NO PUEDE GENERAR UN RECIBO CUANDO EL MEDIO DE PAGO NO ES SOLO EFECTIVO!", "warning");
             return false;
         } else {
-            var tipo_pago = mpago.length > 1 ? 6 : mpago[0]['id_tp'];
+
             $(this).attr('disabled', true);
             // Desactiva por completo el boton para que no se pueda dar mas de un click!
             $(this).css({ 'pointer-events': 'none' });

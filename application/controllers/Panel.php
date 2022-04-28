@@ -129,7 +129,6 @@ class Panel extends Secure_area {
 	public function salir()
 	{
 		$this->session->sess_destroy();
-		//$this->load->view('login');
 		redirect('login');
 	}
 

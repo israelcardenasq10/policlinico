@@ -57,10 +57,12 @@ class Ventas_model extends CI_Model {
 
 	public function verdetcierre($id_cierre)
 	{
-		$this->db->select("tp.tipo_pago,a.num_doc,a.total_venta,a.fecha_registro");
+		$this->db->select("tp.tipo_pago,a.num_doc, tp.monto AS total_venta,a.fecha_registro");
 		$this->db->from('tb_transac_pventa a');		
-		$this->db->join('tb_tipo_pago tp', 'a.id_tp=tp.id_tp');		
+		$this->db->join('tb_transac_pventa_mpago tp', 'a.id_transac=tp.id_transac');		
 		$this->db->where('a.id_cierre', $id_cierre);		
+		$this->db->where("a.anulado","NO");
+		$this->db->where_not_in("a.tdoc ", array('07','08') );
 		$this->db->order_by('tp.tipo_pago', 'ASC');	
 		$this->db->order_by('a.id_transac', 'ASC');	
         $query = $this->db->get();
@@ -71,8 +73,10 @@ class Ventas_model extends CI_Model {
 	{
 		$this->db->select("tp.tipo_pago,SUM(tp.monto) AS total_venta");
 		$this->db->from('tb_transac_pventa a');		
-		$this->db->join('tb_transac_pventa_mpago tp', 'a.id_transac=tp.id_transac');		
-		$this->db->where('a.id_cierre', $id_cierre);		
+		$this->db->join('tb_transac_pventa_mpago tp', 'a.id_transac=tp.id_transac');	
+		$this->db->where('a.id_cierre', $id_cierre);
+		$this->db->where("a.anulado","NO");
+		$this->db->where_not_in("a.tdoc ", array('07','08') );		
 		$this->db->group_by("tp.tipo_pago");
 		$this->db->order_by('tp.tipo_pago', 'ASC');	
         $query = $this->db->get();
@@ -87,8 +91,8 @@ class Ventas_model extends CI_Model {
 		$this->db->join('tb_tipo_pago tp', 'pv.id_tp = tp.id_tp');
 		// Inner Join para Clientes Aqui!
 		$this->db->join('tb_tmp_cab_pventa tmpcab', 'pv.id_tmp_cab = tmpcab.id_tmp_cab');
-		$this->db->join('tb_empleados e', 'tmpcab.id_emple = e.id');
-		$this->db->join('tb_datos d', 'e.person_id = d.person_id');
+		$this->db->join('tb_datos d', 'tmpcab.id_emple = d.person_id');
+		$this->db->join('tb_empleados e', 'd.person_id = e.person_id');
 		$this->db->join('tb_pv_mesas m', 'tmpcab.id_mesa = m.id_mesa');
 		$this->db->where('pv.id_transac', $id);		
         $query = $this->db->get();

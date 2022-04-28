@@ -150,7 +150,7 @@ class Reportes extends Secure_area {
 		$lista = $this->ventas_model->filtrar($fecha1, $fecha2, $cbo_1, $anulado, $cbo_2);
 		foreach ($lista as $value){
 
-			$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, substr($value->fecha_emision,0,15) );
+			$objPHPExcel->getActiveSheet()->setCellValue('A' . $i, substr($value->fecha_emision,0,19) );
 			$objPHPExcel->getActiveSheet()->setCellValue('B' . $i, "-");
 			$objPHPExcel->getActiveSheet()->setCellValue('C' . $i, PHPExcel_Shared_Date::PHPToExcel($value->fecha_creacion));
 			$objPHPExcel->getActiveSheet()->getStyle('C' . $i)->getNumberFormat()->setFormatCode(PHPExcel_Style_NumberFormat::FORMAT_DATE_YYYYMMDD2);
@@ -178,7 +178,6 @@ class Reportes extends Secure_area {
         ob_end_clean();
 		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         
-        //$extension = '.xls';
         $extension = '.xlsx';
         $filename = 'Reporte_Comprobantes_' . date("d-m-Y") . '---' . rand(1000, 9999) . $extension; //save our workbook as this file name
         header('Content-Disposition: attachment;filename="' . $filename . '"'); //tell browser what's the file name
@@ -196,13 +195,6 @@ class Reportes extends Secure_area {
 		$this->load->library('excel');
 
         $objPHPExcel = new PHPExcel();
-        // $objPHPExcel->getProperties()->setCreator("Maarten Balliauw")
-        //         ->setLastModifiedBy("Maarten Balliauw")
-        //         ->setTitle("Office 2007 XLSX Test Document")
-        //         ->setSubject("Office 2007 XLSX Test Document")
-        //         ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
-        //         ->setKeywords("office 2007 openxml php")
-        //         ->setCategory("Test result file");
 
         $objPHPExcel->setActiveSheetIndex(0);
         $objPHPExcel->getActiveSheet()->setTitle('REPORTE CONSOLIDADOS');
@@ -299,13 +291,6 @@ class Reportes extends Secure_area {
 		// to_excel($this->reportes_model->exportarExcelVentasBar($fecha1, $fecha2, $cbo_1), $this->nom_reporte);
 		
         $objPHPExcel = new PHPExcel();
-        $objPHPExcel->getProperties()->setCreator("Maarten Balliauw")
-                ->setLastModifiedBy("Maarten Balliauw")
-                ->setTitle("Office 2007 XLSX Test Document")
-                ->setSubject("Office 2007 XLSX Test Document")
-                ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.")
-                ->setKeywords("office 2007 openxml php")
-                ->setCategory("Test result file");
 
         $objPHPExcel->setActiveSheetIndex(0);
         $objPHPExcel->getActiveSheet()->setTitle('REPORTE CONSOLIDADOS');
